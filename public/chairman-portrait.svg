@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 360" width="300" height="360">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#042f24" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="skin" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f5d0b5" />
+      <stop offset="100%" stop-color="#dfa886" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background with subtle lighting -->
+  <rect width="300" height="360" fill="url(#bgGrad)"/>
+  <circle cx="150" cy="140" r="110" fill="#0d5c4a" opacity="0.35"/>
+
+  <!-- Body / Formal Suit / Mujib Coat -->
+  <g transform="translate(150, 210)">
+    <!-- Shoulders -->
+    <path d="M -110,150 Q -90,60 0,60 Q 90,60 110,150 Z" fill="#1e293b"/>
+    <!-- Collar & Black Mujib Coat / Waistcoat -->
+    <path d="M -75,150 Q -60,65 0,65 Q 60,65 75,150 Z" fill="#0f172a" stroke="#d97706" stroke-width="1.5"/>
+    <!-- White Kurta Collar -->
+    <polygon points="-25,65 25,65 0,115" fill="#f8fafc"/>
+    <rect x="-6" y="70" width="12" height="75" fill="#f8fafc"/>
+    <!-- Gold Buttons -->
+    <circle cx="0" cy="88" r="3.5" fill="#f59e0b"/>
+    <circle cx="0" cy="108" r="3.5" fill="#f59e0b"/>
+    <circle cx="0" cy="128" r="3.5" fill="#f59e0b"/>
+  </g>
+
+  <!-- Head & Neck -->
+  <g transform="translate(150, 130)">
+    <!-- Neck -->
+    <rect x="-24" y="60" width="48" height="35" fill="url(#skin)"/>
+    <!-- Head Base -->
+    <ellipse cx="0" cy="15" rx="55" ry="65" fill="url(#skin)"/>
+    <!-- Ears -->
+    <ellipse cx="-56" cy="18" rx="8" ry="16" fill="url(#skin)"/>
+    <ellipse cx="56" cy="18" rx="8" ry="16" fill="url(#skin)"/>
+
+    <!-- Hair (Silver/Grey Dignified) -->
+    <path d="M -55,0 Q 0,-60 55,0 Q 50,-50 -50,-50 Z" fill="#475569"/>
+    <path d="M -56,5 Q -58,-30 -20,-50 Q 20,-50 56,-30 Q 58,5 56,15 Q 52,-35 -52,-35 Z" fill="#64748b"/>
+
+    <!-- Eyebrows -->
+    <path d="M -38,-5 Q -22,-12 -8,-5" stroke="#334155" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M 8,-5 Q 22,-12 38,-5" stroke="#334155" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+    <!-- Glasses (Formal Gold/Steel Frame) -->
+    <rect x="-42" y="-3" width="34" height="24" rx="6" fill="none" stroke="#d97706" stroke-width="2.5"/>
+    <rect x="8" y="-3" width="34" height="24" rx="6" fill="none" stroke="#d97706" stroke-width="2.5"/>
+    <line x1="-8" y1="8" x2="8" y2="8" stroke="#d97706" stroke-width="2"/>
+    <line x1="-42" y1="8" x2="-54" y2="5" stroke="#d97706" stroke-width="2"/>
+    <line x1="42" y1="8" x2="54" y2="5" stroke="#d97706" stroke-width="2"/>
+
+    <!-- Eyes inside glasses -->
+    <ellipse cx="-25" cy="8" rx="5" ry="4" fill="#0f172a"/>
+    <circle cx="-23" cy="7" r="1.5" fill="#ffffff"/>
+    <ellipse cx="25" cy="8" rx="5" ry="4" fill="#0f172a"/>
+    <circle cx="27" cy="7" r="1.5" fill="#ffffff"/>
+
+    <!-- Nose -->
+    <path d="M 0,2 L -3,28 L 5,28" stroke="#c28e6c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+    <!-- Mustache & Gentle Smile -->
+    <path d="M -22,40 Q 0,44 22,40" stroke="#475569" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M -15,50 Q 0,58 15,50" stroke="#991b1b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Border & Seal of Office -->
+  <rect x="0" y="0" width="300" height="360" fill="none" stroke="#d97706" stroke-width="4"/>
+  <rect x="8" y="8" width="284" height="344" fill="none" stroke="#0d5c4a" stroke-width="2" opacity="0.6"/>
+
+  <!-- Designation Banner Bottom -->
+  <rect x="18" y="305" width="264" height="42" rx="6" fill="#064e3b" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="150" y="323" font-family="'Noto Serif Bengali', serif" font-size="12.5" font-weight="bold" fill="#ffffff" text-anchor="middle">
+    সভাপতি, ম্যানেজিং কমিটি
+  </text>
+  <text x="150" y="339" font-family="'DM Sans', sans-serif" font-size="10" font-weight="600" fill="#fde68a" text-anchor="middle" letter-spacing="1">
+    CHAIRMAN, MANAGING COMMITTEE
+  </text>
+</svg>
+

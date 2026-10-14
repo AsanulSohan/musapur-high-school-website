@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="sepiaSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3d2d1d" />
+      <stop offset="60%" stop-color="#6e543c" />
+      <stop offset="100%" stop-color="#a48464" />
+    </linearGradient>
+    <linearGradient id="sepiaGround" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#5a4531" />
+      <stop offset="100%" stop-color="#2a1f15" />
+    </linearGradient>
+    <filter id="noise" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" result="noise" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0.8  0 0 0 0 0.7  0 0 0 0 0.5  0 0 0 0.12 0" />
+      <feBlend in="SourceGraphic" in2="noise" mode="multiply" />
+    </filter>
+  </defs>
+
+  <!-- Background Sky / Vintage Sepia Archive -->
+  <rect width="800" height="500" fill="url(#sepiaSky)"/>
+
+  <!-- Sun Glow -->
+  <circle cx="620" cy="140" r="70" fill="#dfbe99" opacity="0.35"/>
+
+  <!-- Distant Palm & Coconut Trees (Noakhali Rural Landscape) -->
+  <g fill="#332417" opacity="0.85">
+    <!-- Palm 1 -->
+    <path d="M 120,320 Q 125,220 135,170" stroke="#332417" stroke-width="6" fill="none"/>
+    <path d="M 135,170 Q 100,150 70,165 M 135,170 Q 110,135 90,135 M 135,170 Q 135,120 135,115 M 135,170 Q 160,135 180,135 M 135,170 Q 170,150 200,165" stroke="#332417" stroke-width="4" stroke-linecap="round"/>
+    <!-- Palm 2 -->
+    <path d="M 680,320 Q 675,210 660,160" stroke="#332417" stroke-width="6" fill="none"/>
+    <path d="M 660,160 Q 625,140 595,155 M 660,160 Q 640,125 615,125 M 660,160 Q 665,110 665,105 M 660,160 Q 685,125 710,125 M 660,160 Q 695,140 730,155" stroke="#332417" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <!-- Ground -->
+  <rect y="310" width="800" height="190" fill="url(#sepiaGround)"/>
+
+  <!-- Historic Original School Building Structure (Tin-Shed / Red Brick 1972) -->
+  <g transform="translate(160, 160)">
+    <!-- Roof Triangular Gable -->
+    <polygon points="240,15 20,80 460,80" fill="#4d2f1f" stroke="#2a180e" stroke-width="3"/>
+    <!-- Main Wall Block -->
+    <rect x="35" y="80" width="410" height="135" fill="#8c6246" stroke="#2a180e" stroke-width="3"/>
+    <!-- Foundation plinth -->
+    <rect x="25" y="215" width="430" height="18" fill="#543826"/>
+
+    <!-- Corridor Pillars (6 pillars) -->
+    <rect x="55" y="80" width="16" height="135" fill="#caa788" stroke="#382113" stroke-width="2"/>
+    <rect x="125" y="80" width="16" height="135" fill="#caa788" stroke="#382113" stroke-width="2"/>
+    <rect x="195" y="80" width="16" height="135" fill="#caa788" stroke="#382113" stroke-width="2"/>
+    <rect x="265" y="80" width="16" height="135" fill="#caa788" stroke="#382113" stroke-width="2"/>
+    <rect x="335" y="80" width="16" height="135" fill="#caa788" stroke="#382113" stroke-width="2"/>
+    <rect x="405" y="80" width="16" height="135" fill="#caa788" stroke="#382113" stroke-width="2"/>
+
+    <!-- Entrance Door Arch -->
+    <rect x="220" y="115" width="40" height="100" fill="#291a10"/>
+    <path d="M 220,115 A 20,20 0 0,1 260,115 Z" fill="#291a10"/>
+
+    <!-- Historic Signboard -->
+    <rect x="150" y="55" width="180" height="28" fill="#f4ebd9" rx="3" stroke="#2a180e" stroke-width="2"/>
+    <text x="240" y="73" font-family="'Noto Serif Bengali', serif" font-size="12" font-weight="bold" fill="#382113" text-anchor="middle">
+      মুছাপুর উচ্চ বিদ্যালয় (১৯৭২)
+    </text>
+
+    <!-- Windows -->
+    <rect x="80" y="120" width="35" height="50" fill="#352216" stroke="#e8d5be" stroke-width="2"/>
+    <rect x="150" y="120" width="35" height="50" fill="#352216" stroke="#e8d5be" stroke-width="2"/>
+    <rect x="290" y="120" width="35" height="50" fill="#352216" stroke="#e8d5be" stroke-width="2"/>
+    <rect x="360" y="120" width="35" height="50" fill="#352216" stroke="#e8d5be" stroke-width="2"/>
+  </g>
+
+  <!-- Historic Flag Post -->
+  <line x1="610" y1="210" x2="610" y2="340" stroke="#d5beaa" stroke-width="4"/>
+  <rect x="612" y="215" width="36" height="24" fill="#a44434" stroke="#d5beaa" stroke-width="1"/>
+
+  <!-- Vintage Photo Frame & Vignette Overlay -->
+  <rect x="0" y="0" width="800" height="500" fill="none" stroke="#251a11" stroke-width="22"/>
+  <rect x="15" y="15" width="770" height="470" fill="none" stroke="#d5beaa" stroke-width="2" opacity="0.6"/>
+
+  <!-- Badge / Timestamp Overlay -->
+  <rect x="35" y="35" width="220" height="54" rx="8" fill="#1b120c" fill-opacity="0.85" stroke="#a48464" stroke-width="1.5"/>
+  <text x="50" y="56" font-family="'DM Sans', sans-serif" font-size="11" font-weight="700" fill="#dfbe99" letter-spacing="1">HISTORICAL ARCHIVE · 1972</text>
+  <text x="50" y="76" font-family="'Noto Serif Bengali', serif" font-size="14" font-weight="600" fill="#ffffff">ভিত্তিপ্রস্তর ও আদি ক্যাম্পাস</text>
+
+  <!-- Watermark Bottom Right -->
+  <rect x="525" y="420" width="235" height="42" rx="6" fill="#1b120c" fill-opacity="0.85" stroke="#a48464" stroke-width="1.2"/>
+  <text x="642" y="445" font-family="'DM Sans', sans-serif" font-size="11.5" font-weight="700" fill="#dfbe99" text-anchor="middle">
+    MUSAPUR HIGH SCHOOL (EIIN: 107335)
+  </text>
+</svg>
+

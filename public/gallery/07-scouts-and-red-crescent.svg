@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="scoutSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="70%" stop-color="#bae6fd" />
+      <stop offset="100%" stop-color="#f0fdf4" />
+    </linearGradient>
+    <linearGradient id="tentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#15803d" />
+      <stop offset="50%" stop-color="#22c55e" />
+      <stop offset="100%" stop-color="#166534" />
+    </linearGradient>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="800" height="500" fill="url(#scoutSky)"/>
+
+  <!-- Scout Camp Ground -->
+  <rect y="280" width="800" height="220" fill="#15803d"/>
+
+  <!-- Scout Tents (Camporama layout) -->
+  <!-- Left Tent -->
+  <polygon points="120,340 180,210 240,340" fill="url(#tentGrad)" stroke="#14532d" stroke-width="3"/>
+  <polygon points="180,210 240,340 310,320 250,190" fill="#14532d"/>
+  <polygon points="150,340 180,270 210,340" fill="#052e16"/>
+
+  <!-- Right Tent -->
+  <polygon points="560,340 620,210 680,340" fill="url(#tentGrad)" stroke="#14532d" stroke-width="3"/>
+  <polygon points="620,210 680,340 750,320 690,190" fill="#14532d"/>
+  <polygon points="590,340 620,270 650,340" fill="#052e16"/>
+
+  <!-- Campfire in Center Foreground -->
+  <g transform="translate(400, 370)">
+    <!-- Logs -->
+    <line x1="-35" y1="20" x2="35" y2="5" stroke="#78350f" stroke-width="12" stroke-linecap="round"/>
+    <line x1="-25" y1="5" x2="25" y2="20" stroke="#92400e" stroke-width="12" stroke-linecap="round"/>
+    <!-- Flames -->
+    <polygon points="-15,10 0,-40 15,10" fill="#ea580c"/>
+    <polygon points="-8,10 0,-25 8,10" fill="#facc15"/>
+  </g>
+
+  <!-- Scout Flagpole & Red Crescent Flags -->
+  <line x1="390" y1="60" x2="390" y2="340" stroke="#475569" stroke-width="4"/>
+  <!-- Bangladesh Scouts Flag (Green with scout fleur-de-lis) -->
+  <rect x="392" y="70" width="70" height="42" fill="#15803d" stroke="#f8fafc" stroke-width="1.5"/>
+  <circle cx="427" cy="91" r="14" fill="#facc15"/>
+  <polygon points="427,82 430,95 427,91 424,95" fill="#15803d"/>
+
+  <!-- Bangladesh Red Crescent Flag -->
+  <rect x="392" y="125" width="70" height="42" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <!-- Red Crescent Moon -->
+  <path d="M 432,134 A 12,12 0 1,0 432,158 A 9,9 0 1,1 432,134 Z" fill="#dc2626"/>
+
+  <!-- Scouts Standing at Attention in Uniform (Khaki + Scarf) -->
+  <g transform="translate(230, 290)">
+    <!-- Scout 1 -->
+    <circle cx="20" cy="20" r="12" fill="#fbcfe8"/>
+    <rect x="10" y="32" width="20" height="35" rx="3" fill="#a16207"/>
+    <!-- Green/Red Scarf -->
+    <polygon points="12,32 20,46 28,32" fill="#15803d"/>
+    <rect x="11" y="67" width="8" height="38" fill="#1e293b"/>
+    <rect x="21" y="67" width="8" height="38" fill="#1e293b"/>
+  </g>
+
+  <g transform="translate(290, 290)">
+    <!-- Scout 2 -->
+    <circle cx="20" cy="20" r="12" fill="#fbcfe8"/>
+    <rect x="10" y="32" width="20" height="35" rx="3" fill="#a16207"/>
+    <polygon points="12,32 20,46 28,32" fill="#dc2626"/>
+    <rect x="11" y="67" width="8" height="38" fill="#1e293b"/>
+    <rect x="21" y="67" width="8" height="38" fill="#1e293b"/>
+  </g>
+
+  <g transform="translate(470, 290)">
+    <!-- Scout 3 -->
+    <circle cx="20" cy="20" r="12" fill="#fbcfe8"/>
+    <rect x="10" y="32" width="20" height="35" rx="3" fill="#a16207"/>
+    <polygon points="12,32 20,46 28,32" fill="#15803d"/>
+    <rect x="11" y="67" width="8" height="38" fill="#1e293b"/>
+    <rect x="21" y="67" width="8" height="38" fill="#1e293b"/>
+  </g>
+
+  <g transform="translate(530, 290)">
+    <!-- Scout 4 -->
+    <circle cx="20" cy="20" r="12" fill="#fbcfe8"/>
+    <rect x="10" y="32" width="20" height="35" rx="3" fill="#a16207"/>
+    <polygon points="12,32 20,46 28,32" fill="#dc2626"/>
+    <rect x="11" y="67" width="8" height="38" fill="#1e293b"/>
+    <rect x="21" y="67" width="8" height="38" fill="#1e293b"/>
+  </g>
+
+  <!-- Badge Top Left -->
+  <rect x="35" y="35" width="235" height="52" rx="8" fill="#064e3b" fill-opacity="0.9" stroke="#b7d84b" stroke-width="1.5"/>
+  <text x="50" y="56" font-family="'DM Sans', sans-serif" font-size="11" font-weight="700" fill="#b7d84b" letter-spacing="1">YOUTH LEADERSHIP</text>
+  <text x="50" y="75" font-family="'Noto Serif Bengali', serif" font-size="13" font-weight="600" fill="#ffffff">স্কাউট ও রেড ক্রিসেন্ট দল</text>
+</svg>
+
