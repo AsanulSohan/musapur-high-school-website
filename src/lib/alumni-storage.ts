@@ -10,6 +10,13 @@ const TMP_DATA_FILE_PATH = path.join(os.tmpdir(), "mhs-alumni-stories.json");
 // In-memory cache for serverless runtimes when disk writes are restricted
 const memoryStoriesCache: AlumniStoryItem[] = [];
 
+// IDs to explicitly exclude from displaying (test stories and duplicates)
+export const EXCLUDED_STORY_IDS = new Set([
+  "test-check-connection",
+  "alumni-1792104318857-3edll",
+  "alumni-1792104703795-aibab", // duplicate Anwar Hossain (keeps clean local one)
+]);
+
 /**
  * Reads initial static stories from the bundled JSON file.
  */
@@ -18,12 +25,33 @@ function getStaticStories(): AlumniStoryItem[] {
     if (fs.existsSync(DATA_FILE_PATH)) {
       const fileContent = fs.readFileSync(DATA_FILE_PATH, "utf-8");
       const parsed: AlumniStoryItem[] = JSON.parse(fileContent);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed)) return parsed.filter((s) => !EXCLUDED_STORY_IDS.has(s.id));
     }
   } catch (error) {
     console.warn("Could not read base stories file:", error);
   }
   return [];
+}
+
+/**
+ * Deduplicates stories by identity (name, batch, title) and sorts latest first.
+ */
+function processAndDeduplicate(stories: AlumniStoryItem[]): AlumniStoryItem[] {
+  const seenKeys = new Set<string>();
+  const result: AlumniStoryItem[] = [];
+
+  for (const s of stories) {
+    if (EXCLUDED_STORY_IDS.has(s.id)) continue;
+    // Normalize key: name + batch + title
+    const key = `${s.nameBn.trim().toLowerCase()}_${s.batch.trim()}_${s.titleBn.trim().toLowerCase()}`;
+    if (seenKeys.has(key)) continue;
+    seenKeys.add(key);
+    result.push(s);
+  }
+
+  return result.sort(
+    (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+  );
 }
 
 /**
@@ -44,6 +72,7 @@ export async function getAlumniStories(): Promise<AlumniStoryItem[]> {
         const storiesMap = new Map<string, AlumniStoryItem>();
         // Add cloud stories
         data.forEach((item: any) => {
+          if (EXCLUDED_STORY_IDS.has(item.id)) return;
           storiesMap.set(item.id, {
             id: item.id,
             nameBn: item.nameBn || item.name_bn || "",
@@ -66,14 +95,12 @@ export async function getAlumniStories(): Promise<AlumniStoryItem[]> {
         // Merge baseline static stories so the initial school memories are always present
         const staticStories = getStaticStories();
         staticStories.forEach((s) => {
-          if (!storiesMap.has(s.id)) {
+          if (!storiesMap.has(s.id) && !EXCLUDED_STORY_IDS.has(s.id)) {
             storiesMap.set(s.id, s);
           }
         });
 
-        return Array.from(storiesMap.values()).sort(
-          (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
-        );
+        return processAndDeduplicate(Array.from(storiesMap.values()));
       }
     } catch (sbErr) {
       console.warn("Supabase query failed, falling back to local storage:", sbErr);
@@ -84,26 +111,29 @@ export async function getAlumniStories(): Promise<AlumniStoryItem[]> {
   const storiesMap = new Map<string, AlumniStoryItem>();
 
   const staticStories = getStaticStories();
-  staticStories.forEach((s) => storiesMap.set(s.id, s));
+  staticStories.forEach((s) => {
+    if (!EXCLUDED_STORY_IDS.has(s.id)) storiesMap.set(s.id, s);
+  });
 
   try {
     if (fs.existsSync(TMP_DATA_FILE_PATH)) {
       const tmpContent = fs.readFileSync(TMP_DATA_FILE_PATH, "utf-8");
       const parsedTmp: AlumniStoryItem[] = JSON.parse(tmpContent);
       if (Array.isArray(parsedTmp)) {
-        parsedTmp.forEach((s) => storiesMap.set(s.id, s));
+        parsedTmp.forEach((s) => {
+          if (!EXCLUDED_STORY_IDS.has(s.id)) storiesMap.set(s.id, s);
+        });
       }
     }
   } catch (error) {
     console.warn("Could not read tmp stories file:", error);
   }
 
-  memoryStoriesCache.forEach((s) => storiesMap.set(s.id, s));
+  memoryStoriesCache.forEach((s) => {
+    if (!EXCLUDED_STORY_IDS.has(s.id)) storiesMap.set(s.id, s);
+  });
 
-  const allStories = Array.from(storiesMap.values());
-  return allStories.sort(
-    (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
-  );
+  return processAndDeduplicate(Array.from(storiesMap.values()));
 }
 
 /**

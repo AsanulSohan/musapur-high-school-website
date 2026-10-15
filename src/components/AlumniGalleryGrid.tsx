@@ -40,13 +40,23 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
 
   // Fetch stories on mount from API and merge with local cache
   useEffect(() => {
+    const EXCLUDED_IDS = new Set([
+      "test-check-connection",
+      "alumni-1792104318857-3edll",
+      "alumni-1792104703795-aibab",
+    ]);
+
     async function loadStories() {
       // 1. Read locally cached submissions
       let localStories: AlumniStoryItem[] = [];
       try {
         const cached = localStorage.getItem("mhs_alumni_stories_cache");
         if (cached) {
-          localStories = JSON.parse(cached);
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed)) {
+            localStories = parsed.filter((s: AlumniStoryItem) => !EXCLUDED_IDS.has(s.id));
+            localStorage.setItem("mhs_alumni_stories_cache", JSON.stringify(localStories));
+          }
         }
       } catch {}
 
@@ -56,12 +66,27 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
           const data = await res.json();
           if (data.success && Array.isArray(data.stories)) {
             const combinedMap = new Map<string, AlumniStoryItem>();
-            localStories.forEach((s) => combinedMap.set(s.id, s));
-            data.stories.forEach((s: AlumniStoryItem) => combinedMap.set(s.id, s));
-            const merged = Array.from(combinedMap.values()).sort(
+            localStories.forEach((s) => {
+              if (!EXCLUDED_IDS.has(s.id)) combinedMap.set(s.id, s);
+            });
+            data.stories.forEach((s: AlumniStoryItem) => {
+              if (!EXCLUDED_IDS.has(s.id)) combinedMap.set(s.id, s);
+            });
+
+            // Deduplicate by name + batch + title
+            const seen = new Set<string>();
+            const unique: AlumniStoryItem[] = [];
+            for (const s of combinedMap.values()) {
+              const k = `${s.nameBn.trim().toLowerCase()}_${s.batch.trim()}_${s.titleBn.trim().toLowerCase()}`;
+              if (seen.has(k)) continue;
+              seen.add(k);
+              unique.push(s);
+            }
+
+            unique.sort(
               (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
             );
-            setStories(merged);
+            setStories(unique);
             return;
           }
         }
@@ -74,7 +99,7 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
           const map = new Map<string, AlumniStoryItem>();
           localStories.forEach((s) => map.set(s.id, s));
           prev.forEach((s) => map.set(s.id, s));
-          return Array.from(map.values());
+          return Array.from(map.values()).filter((s) => !EXCLUDED_IDS.has(s.id));
         });
       }
     }

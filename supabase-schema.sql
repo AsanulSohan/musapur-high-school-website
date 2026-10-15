@@ -30,26 +30,33 @@ CREATE TABLE IF NOT EXISTS alumni_stories (
 ALTER TABLE alumni_stories ENABLE ROW LEVEL SECURITY;
 
 -- 3. Allow anyone to view stories
+DROP POLICY IF EXISTS "Allow public read alumni_stories" ON alumni_stories;
 CREATE POLICY "Allow public read alumni_stories" ON alumni_stories
   FOR SELECT USING (true);
 
 -- 4. Allow alumni to submit stories
+DROP POLICY IF EXISTS "Allow public insert alumni_stories" ON alumni_stories;
 CREATE POLICY "Allow public insert alumni_stories" ON alumni_stories
   FOR INSERT WITH CHECK (true);
 
 -- 5. Allow users to like stories
+DROP POLICY IF EXISTS "Allow public update likes" ON alumni_stories;
 CREATE POLICY "Allow public update likes" ON alumni_stories
   FOR UPDATE USING (true);
 
--- 6. Create Storage Bucket for photos (public)
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('alumni-photos', 'alumni-photos', true)
-ON CONFLICT (id) DO NOTHING;
-
--- 7. Storage Policies: Allow public view & upload
+-- 6. Storage Policies: Allow public view & upload
+DROP POLICY IF EXISTS "Allow public read alumni photos" ON storage.objects;
 CREATE POLICY "Allow public read alumni photos" ON storage.objects
   FOR SELECT USING (bucket_id = 'alumni-photos');
 
+DROP POLICY IF EXISTS "Allow public upload alumni photos" ON storage.objects;
 CREATE POLICY "Allow public upload alumni photos" ON storage.objects
   FOR INSERT WITH CHECK (bucket_id = 'alumni-photos');
 
+-- 7. CLEANUP: Delete test rows and duplicate Anwar Hossain
+DELETE FROM alumni_stories
+WHERE id IN (
+  'test-check-connection',
+  'alumni-1792104318857-3edll',
+  'alumni-1792104703795-aibab'
+);
