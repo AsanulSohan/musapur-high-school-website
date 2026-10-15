@@ -3,21 +3,29 @@
 import React, { useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import {
+  CLASS_ROUTINES_2026,
+  SYLLABUS_DATA_2026,
+  ACADEMIC_CALENDAR_2026,
+} from "@/data/school-data";
+import {
   Atom,
   Briefcase,
   BookOpen,
   Monitor,
-  Flame,
-  Award,
+  Calendar,
+  Clock,
   CheckCircle,
-  Users,
-  Compass,
+  Download,
   ArrowRight,
+  Compass,
+  FileText,
+  CalendarCheck,
 } from "lucide-react";
 import Modal from "./Modal";
 
 export default function AcademicPrograms() {
   const { isBn } = useLanguage();
+  const [activeTab, setActiveTab] = useState<"streams" | "routine" | "syllabus" | "calendar">("streams");
   const [selectedStream, setSelectedStream] = useState<string | null>(null);
 
   const streams = [
@@ -69,102 +77,340 @@ export default function AcademicPrograms() {
     {
       titleBn: "শেখ রাসেল ডিজিটাল ল্যাব",
       titleEn: "Sheikh Russell Digital Lab",
-      descBn: "উচ্চগতির ব্রডব্যান্ড ইন্টারনেট এবং আধুনিক কম্পিউটার সমৃদ্ধ স্মার্ট ল্যাব。",
+      descBn: "উচ্চগতির ব্রডব্যান্ড ইন্টারনেট এবং আধুনিক কম্পিউটার সমৃদ্ধ স্মার্ট ল্যাব।",
       descEn: "High-speed broadband internet and contemporary PC workstations for computer literacy.",
       icon: <Monitor className="text-[#064e3b]" size={22} />,
     },
     {
       titleBn: "আধুনিক বিজ্ঞানাগার",
       titleEn: "Modern Science Practical Lab",
-      descBn: "পদার্থ, রসায়ন ও জীববিজ্ঞানের সকল প্রয়োজনীয় রাসায়নিক ও ব্যবহারিক যন্ত্রপাতি。",
+      descBn: "পদার্থ, রসায়ন ও জীববিজ্ঞানের সকল প্রয়োজনীয় রাসায়নিক ও ব্যবহারিক যন্ত্রপাতি।",
       descEn: "Equipped with precision instruments, chemicals, and specimens for board practicals.",
       icon: <Atom className="text-[#d97706]" size={22} />,
     },
     {
       titleBn: "বঙ্গবন্ধু ও মুক্তিযুদ্ধ কর্নার লাইব্রেরি",
       titleEn: "Library & Liberation War Corner",
-      descBn: "সহস্রাধিক মূল্যবান পুস্তক, রেফারেন্স গ্রন্থ ও জাতীয় সংবাদপত্র সমৃদ্ধ পাঠাগার。",
+      descBn: "সহস্রাধিক মূল্যবান পুস্তক, রেফারেন্স গ্রন্থ ও জাতীয় সংবাদপত্র সমৃদ্ধ পাঠাগার।",
       descEn: "Thousands of historical archives, reference volumes, and national periodicals.",
       icon: <BookOpen className="text-emerald-700" size={22} />,
     },
     {
       titleBn: "বাংলাদেশ স্কাউট ও রেড ক্রিসেন্ট",
       titleEn: "MHS Scouts & Red Crescent",
-      descBn: "দুর্যোগ মোকাবিলা, শৃঙ্খলা ও আত্মমর্যাদা বৃদ্ধির সক্রিয় সহশিক্ষা কার্যক্রম。",
+      descBn: "দুর্যোগ মোকাবিলা, শৃঙ্খলা ও আত্মমর্যাদা বৃদ্ধির সক্রিয় সহশিক্ষা কার্যক্রম।",
       descEn: "Disaster management training, outdoor camps, and community welfare initiatives.",
       icon: <Compass className="text-blue-700" size={22} />,
     },
   ];
 
+  const handleRoutineDownload = (className: string) => {
+    alert(
+      isBn
+        ? `${className}-এর ২০২৬ শিক্ষাবর্ষের ক্লাস রুটিন ডাউনলোড হচ্ছে...`
+        : `Downloading 2026 Class Schedule for ${className}...`
+    );
+  };
+
+  const handleSyllabusDownload = (title: string) => {
+    alert(
+      isBn
+        ? `${title}-এর বার্ষিক সিলেবাস ২০২৬ ডাউনলোড হচ্ছে...`
+        : `Downloading Syllabus for ${title}...`
+    );
+  };
+
   return (
     <section id="academics" className="py-14 sm:py-20 bg-slate-50 border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Title */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-10">
           <span className="text-xs font-bold uppercase tracking-widest text-[#d97706] mb-1.5 block font-sans">
             {isBn ? "মাধ্যমিক স্তর (৬ষ্ঠ হতে ১০ম শ্রেণি)" : "Secondary School Education (Grades 6-10)"}
           </span>
           <h2 className="font-bangla-serif text-3xl sm:text-4xl font-extrabold text-[#064e3b]">
-            {isBn ? "একাডেমিক পাঠ্যক্রম ও শিক্ষাদান পদ্ধতি" : "Academic Curricula & Streams"}
+            {isBn ? "একাডেমিক পাঠ্যক্রম, রুটিন ও সিলেবাস" : "Academic Programs, Routines & Syllabus"}
           </h2>
           <div className="w-16 h-1 bg-[#d97706] mx-auto mt-3 rounded-full" />
           <p className="font-bangla text-xs sm:text-sm text-slate-600 mt-3">
             {isBn
-              ? "জাতীয় শিক্ষাক্রম ও পাঠ্যপুস্তক বোর্ড (এনসিটিবি) এবং কুমিল্লা শিক্ষা বোর্ডের নির্দেশনায় মানসম্মত শিক্ষা প্রদান。"
+              ? "জাতীয় শিক্ষাক্রম ও পাঠ্যপুস্তক বোর্ড (এনসিটিবি) এবং কুমিল্লা শিক্ষা বোর্ডের নির্দেশনায় ২০২৬ শিক্ষাবর্ষের তথ্য。"
               : "Affiliated strictly with Comilla Education Board and following the national NCTB secondary curriculum."}
           </p>
         </div>
 
-        {/* 3 Academic Streams Grid (Class 9 & 10) */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          {streams.map((stream) => (
-            <div
-              key={stream.id}
-              className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs hover:shadow-md hover:border-emerald-600 transition flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">{stream.icon}</div>
-                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-sans">
-                    {isBn ? stream.badgeBn : stream.badgeEn}
+        {/* Navigation Tabs */}
+        <div className="flex items-center justify-center gap-2 mb-10 overflow-x-auto pb-2 notice-scrollbar">
+          <button
+            type="button"
+            onClick={() => setActiveTab("streams")}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5 font-bangla ${
+              activeTab === "streams"
+                ? "bg-[#064e3b] text-white shadow-md shadow-emerald-950/20"
+                : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
+            }`}
+          >
+            <BookOpen size={15} />
+            <span>{isBn ? "বিভাগ ও পাঠ্যক্রম" : "Academic Streams"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("routine")}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5 font-bangla ${
+              activeTab === "routine"
+                ? "bg-[#064e3b] text-white shadow-md shadow-emerald-950/20"
+                : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
+            }`}
+          >
+            <Clock size={15} />
+            <span>{isBn ? "ক্লাস রুটিন ২০২৬" : "Class Routine 2026"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("syllabus")}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5 font-bangla ${
+              activeTab === "syllabus"
+                ? "bg-[#064e3b] text-white shadow-md shadow-emerald-950/20"
+                : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
+            }`}
+          >
+            <FileText size={15} />
+            <span>{isBn ? "বার্ষিক সিলেবাস ২০২৬" : "Syllabus 2026"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("calendar")}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5 font-bangla ${
+              activeTab === "calendar"
+                ? "bg-[#064e3b] text-white shadow-md shadow-emerald-950/20"
+                : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
+            }`}
+          >
+            <CalendarCheck size={15} />
+            <span>{isBn ? "শিক্ষাপঞ্জি ২০২৬" : "Academic Calendar"}</span>
+          </button>
+        </div>
+
+        {/* TAB 1: ACADEMIC STREAMS (বিজ্ঞান, ব্যবসায় শিক্ষা, মানবিক) */}
+        {activeTab === "streams" && (
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            {streams.map((stream) => (
+              <div
+                key={stream.id}
+                className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs hover:shadow-md hover:border-emerald-600 transition flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">{stream.icon}</div>
+                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-sans">
+                      {isBn ? stream.badgeBn : stream.badgeEn}
+                    </span>
+                  </div>
+
+                  <h3 className="font-bangla-serif text-xl font-bold text-slate-900 mb-2">
+                    {isBn ? stream.titleBn : stream.titleEn}
+                  </h3>
+                  <p className="font-bangla text-xs text-slate-600 leading-relaxed mb-4">
+                    {isBn ? stream.descBn : stream.descEn}
+                  </p>
+
+                  <div className="space-y-1.5 pt-3 border-t border-slate-100">
+                    <p className="text-[11px] font-bold text-slate-700 font-bangla">
+                      {isBn ? "গুরুত্বপূর্ণ বিষয়সমূহ:" : "Key Subject Areas:"}
+                    </p>
+                    <ul className="space-y-1">
+                      {(isBn ? stream.subjectsBn : stream.subjectsEn).map((subj, i) => (
+                        <li key={i} className="flex items-center gap-1.5 text-xs text-slate-600 font-bangla">
+                          <CheckCircle size={12} className="text-emerald-600 shrink-0" />
+                          <span>{subj}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="pt-4 mt-4 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStream(stream.id)}
+                    className="w-full py-2 rounded-xl bg-slate-50 hover:bg-[#064e3b] text-slate-700 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5 group"
+                  >
+                    <span className="font-bangla">{isBn ? "সিলেবাস ও বিবরণ দেখুন" : "View Curriculum"}</span>
+                    <ArrowRight size={13} className="group-hover:translate-x-1 transition" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* TAB 2: CLASS ROUTINES 2026 (রুটিন তালিকা) */}
+        {activeTab === "routine" && (
+          <div className="space-y-6 mb-12">
+            <div className="grid md:grid-cols-2 gap-6">
+              {CLASS_ROUTINES_2026.map((routine) => (
+                <div
+                  key={routine.id}
+                  className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs hover:border-emerald-500 transition"
+                >
+                  <div className="flex items-start justify-between pb-3 mb-3 border-b border-slate-100">
+                    <div>
+                      <h4 className="font-bangla-serif text-lg font-bold text-[#064e3b]">
+                        {isBn ? routine.classNameBn : routine.classNameEn}
+                      </h4>
+                      <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5 font-bangla">
+                        <Clock size={12} className="text-amber-500" />
+                        <span>{isBn ? routine.shiftBn : routine.shiftEn}</span>
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleRoutineDownload(isBn ? routine.classNameBn : routine.classNameEn)}
+                      className="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-[#064e3b] text-[#064e3b] hover:text-white text-xs font-bold transition flex items-center gap-1 border border-emerald-200"
+                    >
+                      <Download size={13} />
+                      <span>PDF</span>
+                    </button>
+                  </div>
+
+                  {/* Daily Period Timetable */}
+                  <div className="space-y-2">
+                    {routine.periods.map((p) => (
+                      <div
+                        key={p.period}
+                        className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded-lg bg-slate-50 border border-slate-100"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-full bg-[#064e3b] text-white flex items-center justify-center font-bold text-[10px]">
+                            {p.period}
+                          </span>
+                          <span className="font-bangla font-semibold text-slate-800">
+                            {isBn ? p.subjectBn : p.subjectEn}
+                          </span>
+                        </div>
+                        <span className="text-[11px] text-slate-500 font-mono">{p.time}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: SYLLABUS DATA 2026 (সিলেবাস তালিকা) */}
+        {activeTab === "syllabus" && (
+          <div className="grid md:grid-cols-2 gap-6 mb-12">
+            {SYLLABUS_DATA_2026.map((syl) => (
+              <div
+                key={syl.id}
+                className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs hover:border-emerald-500 transition flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-start justify-between pb-3 mb-3 border-b border-slate-100">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bangla-serif text-lg font-bold text-[#064e3b]">
+                          {isBn ? syl.classNameBn : syl.classNameEn}
+                        </h4>
+                        {syl.streamBn && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
+                            {isBn ? syl.streamBn : syl.streamEn}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1 font-bangla">
+                        {isBn ? syl.termBn : syl.termEn} • {syl.year}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSyllabusDownload(isBn ? syl.classNameBn : syl.classNameEn)}
+                      className="px-3 py-1.5 rounded-lg bg-[#064e3b] hover:bg-[#0d5c4a] text-white text-xs font-bold transition flex items-center gap-1 shadow-2xs"
+                    >
+                      <Download size={13} className="text-amber-300" />
+                      <span>{syl.fileSize}</span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-1.5 pt-1">
+                    <p className="text-xs font-bold text-slate-700 font-bangla">
+                      {isBn ? "সিলেবাসভুক্ত মূল অধ্যায়সমূহ:" : "Core Syllabus Chapters:"}
+                    </p>
+                    <ul className="space-y-1.5">
+                      {(isBn ? syl.subjectsBn : syl.subjectsEn).map((subj, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-xs text-slate-600 font-bangla">
+                          <CheckCircle size={13} className="text-emerald-600 shrink-0 mt-0.5" />
+                          <span>{subj}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="pt-3 mt-4 border-t border-slate-100 text-[11px] text-slate-400 font-mono flex justify-between">
+                  <span>NCTB Curriculum 2026</span>
+                  <span>Comilla Board Affiliated</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* TAB 4: ACADEMIC CALENDAR 2026 (শিক্ষাপঞ্জি) */}
+        {activeTab === "calendar" && (
+          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs mb-12">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+              <h4 className="font-bangla-serif text-lg font-bold text-[#064e3b]">
+                {isBn ? "২০২৬ শিক্ষাবর্ষের ছুটির তালিকা ও প্রধান শিক্ষাপঞ্জি" : "Academic Calendar & Term Schedules 2026"}
+              </h4>
+              <span className="text-xs text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md font-bold">
+                {isBn ? "কুমিল্লা শিক্ষা বোর্ড অনুমোদিত" : "Comilla Board Approved"}
+              </span>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-3">
+              {ACADEMIC_CALENDAR_2026.map((event) => (
+                <div
+                  key={event.id}
+                  className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 ${
+                    event.type === "exam"
+                      ? "bg-rose-50/60 border-rose-200 text-rose-950"
+                      : event.type === "holiday"
+                      ? "bg-amber-50/60 border-amber-200 text-amber-950"
+                      : "bg-emerald-50/60 border-emerald-200 text-emerald-950"
+                  }`}
+                >
+                  <div className="space-y-0.5">
+                    <span
+                      className={`inline-block px-1.5 py-0.2 rounded text-[10px] font-bold uppercase ${
+                        event.type === "exam"
+                          ? "bg-rose-200 text-rose-900"
+                          : event.type === "holiday"
+                          ? "bg-amber-200 text-amber-900"
+                          : "bg-emerald-200 text-emerald-900"
+                      }`}
+                    >
+                      {event.type}
+                    </span>
+                    <h5 className="font-bangla font-bold text-xs sm:text-sm">
+                      {isBn ? event.titleBn : event.titleEn}
+                    </h5>
+                  </div>
+
+                  <span className="text-xs font-semibold shrink-0 font-bangla text-slate-700">
+                    {isBn ? event.dateRangeBn : event.dateRangeEn}
                   </span>
                 </div>
-
-                <h3 className="font-bangla-serif text-xl font-bold text-slate-900 mb-2">
-                  {isBn ? stream.titleBn : stream.titleEn}
-                </h3>
-                <p className="font-bangla text-xs text-slate-600 leading-relaxed mb-4">
-                  {isBn ? stream.descBn : stream.descEn}
-                </p>
-
-                <div className="space-y-1.5 pt-3 border-t border-slate-100">
-                  <p className="text-[11px] font-bold text-slate-700 font-bangla">
-                    {isBn ? "গুরুত্বপূর্ণ বিষয়সমূহ:" : "Key Subject Areas:"}
-                  </p>
-                  <ul className="space-y-1">
-                    {(isBn ? stream.subjectsBn : stream.subjectsEn).map((subj, i) => (
-                      <li key={i} className="flex items-center gap-1.5 text-xs text-slate-600 font-bangla">
-                        <CheckCircle size={12} className="text-emerald-600 shrink-0" />
-                        <span>{subj}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="pt-4 mt-4 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setSelectedStream(stream.id)}
-                  className="w-full py-2 rounded-xl bg-slate-50 hover:bg-[#064e3b] text-slate-700 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5 group"
-                >
-                  <span className="font-bangla">{isBn ? "সিলেবাস ও বিবরণ দেখুন" : "View Curriculum"}</span>
-                  <ArrowRight size={13} className="group-hover:translate-x-1 transition" />
-                </button>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
 
         {/* Campus Facilities (School-Only Highlights) */}
         <div id="facilities" className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-10 shadow-xs">
@@ -227,4 +473,3 @@ export default function AcademicPrograms() {
     </section>
   );
 }
-

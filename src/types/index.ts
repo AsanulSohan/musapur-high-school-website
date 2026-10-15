@@ -25,6 +25,45 @@ export interface NoticeItem {
   fileSize?: string;
 }
 
+export interface ClassRoutineItem {
+  id: string;
+  classNameBn: string;
+  classNameEn: string;
+  shiftBn: string;
+  shiftEn: string;
+  effectiveDate: string;
+  fileSize: string;
+  periods: {
+    period: number;
+    time: string;
+    subjectBn: string;
+    subjectEn: string;
+  }[];
+}
+
+export interface SyllabusItem {
+  id: string;
+  classNameBn: string;
+  classNameEn: string;
+  streamBn?: string;
+  streamEn?: string;
+  termBn: string;
+  termEn: string;
+  year: string;
+  fileSize: string;
+  subjectsBn: string[];
+  subjectsEn: string[];
+}
+
+export interface AcademicCalendarEvent {
+  id: string;
+  titleBn: string;
+  titleEn: string;
+  dateRangeBn: string;
+  dateRangeEn: string;
+  type: "exam" | "holiday" | "event";
+}
+
 export interface LeaderMessage {
   id: "chairman" | "headmaster";
   titleBn: string;
@@ -58,4 +97,3 @@ export interface ImportantLink {
   badgeBn?: string;
   badgeEn?: string;
 }
-
