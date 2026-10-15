@@ -68,8 +68,8 @@ export default function AlumniUploadForm({ onSuccess, onCancel }: AlumniUploadFo
     setIsCompressing(true);
 
     try {
-      // In-browser Canvas compression: 5MB-15MB -> ~120KB-200KB
-      const result = await compressImage(file, 1200, 0.8);
+      // In-browser Canvas compression: 5MB-15MB -> ~200KB-350KB (Crisp HD Clarity)
+      const result = await compressImage(file, 1600, 0.85);
       setPhotoFile(result.file);
       setPhotoBase64(result.dataUrl);
       setPreviewUrl(result.dataUrl);

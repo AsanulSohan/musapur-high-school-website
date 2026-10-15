@@ -55,8 +55,8 @@ export function normalizeBatchYear(input: string): string {
  */
 export async function compressImage(
   file: File,
-  maxDimension = 1200,
-  quality = 0.8
+  maxDimension = 1600,
+  quality = 0.85
 ): Promise<CompressionResult> {
   const originalSizeKB = Math.round(file.size / 1024);
 

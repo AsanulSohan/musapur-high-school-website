@@ -232,7 +232,7 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
                     fill
                     className="object-cover transition duration-500 group-hover:scale-108"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    unoptimized={item.image.startsWith("data:")}
+                    unoptimized={true}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-75 group-hover:opacity-85 transition" />
 
@@ -375,7 +375,7 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
                 fill
                 className="object-contain"
                 priority
-                unoptimized={selectedStory.image.startsWith("data:")}
+                unoptimized={true}
               />
             </div>
 
