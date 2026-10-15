@@ -13,6 +13,7 @@ import AboutSection from "@/components/AboutSection";
 import PhotoGalleryMarquee from "@/components/PhotoGalleryMarquee";
 import SchoolStatsSection from "@/components/SchoolStatsSection";
 import TeachersSection from "@/components/TeachersSection";
+import AlumniGalleryGrid from "@/components/AlumniGalleryGrid";
 import ImportantLinksSidebar from "@/components/ImportantLinksSidebar";
 import Footer from "@/components/Footer";
 
@@ -73,7 +74,10 @@ export default function Home() {
           {/* 8. Auto-Scrolling Right-to-Left Photo Gallery Marquee with Hover Pause */}
           <PhotoGalleryMarquee initialItems={galleryItems} />
 
-          {/* 9. Institutional Key Statistics & Figures */}
+          {/* 9. Alumni Photo & Story Gallery (Interactive User Uploads & Memories) */}
+          <AlumniGalleryGrid />
+
+          {/* 10. Institutional Key Statistics & Figures */}
           <SchoolStatsSection />
         </main>
 

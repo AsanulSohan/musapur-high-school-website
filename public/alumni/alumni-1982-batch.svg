@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400">
+  <defs>
+    <linearGradient id="sepia1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a3728"/>
+      <stop offset="100%" stop-color="#24170e"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#8b5a2b"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#sepia1)"/>
+  <!-- Vintage Banyan Tree / Campus Background -->
+  <path d="M 50,400 Q 150,200 280,180 Q 420,200 550,400 Z" fill="#1b120c"/>
+  <ellipse cx="300" cy="140" rx="180" ry="80" fill="#2d1e14" opacity="0.8"/>
+  
+  <!-- Friends Standing Together (Vintage Sepia Silhouettes) -->
+  <g transform="translate(140, 180)">
+    <!-- Friend 1 -->
+    <circle cx="40" cy="50" r="18" fill="#e8cca8"/>
+    <path d="M 20,80 L 60,80 L 55,180 L 25,180 Z" fill="#c49a6c"/>
+    <rect x="28" y="180" width="10" height="40" fill="#1e140d"/>
+    <rect x="42" y="180" width="10" height="40" fill="#1e140d"/>
+    
+    <!-- Friend 2 (Arm around friend) -->
+    <circle cx="100" cy="46" r="18" fill="#e8cca8"/>
+    <path d="M 80,78 L 120,78 L 115,180 L 85,180 Z" fill="#8c6239"/>
+    <rect x="88" y="180" width="10" height="40" fill="#1e140d"/>
+    <rect x="102" y="180" width="10" height="40" fill="#1e140d"/>
+    
+    <!-- Friend 3 -->
+    <circle cx="160" cy="48" r="18" fill="#e8cca8"/>
+    <path d="M 140,80 L 180,80 L 175,180 L 145,180 Z" fill="#a67c52"/>
+    <rect x="148" y="180" width="10" height="40" fill="#1e140d"/>
+    <rect x="162" y="180" width="10" height="40" fill="#1e140d"/>
+
+    <!-- Friend 4 -->
+    <circle cx="220" cy="46" r="18" fill="#e8cca8"/>
+    <path d="M 200,78 L 240,78 L 235,180 L 205,180 Z" fill="#c49a6c"/>
+    <rect x="208" y="180" width="10" height="40" fill="#1e140d"/>
+    <rect x="222" y="180" width="10" height="40" fill="#1e140d"/>
+
+    <!-- Friend 5 -->
+    <circle cx="280" cy="52" r="18" fill="#e8cca8"/>
+    <path d="M 260,82 L 300,82 L 295,180 L 265,180 Z" fill="#8c6239"/>
+    <rect x="268" y="180" width="10" height="40" fill="#1e140d"/>
+    <rect x="282" y="180" width="10" height="40" fill="#1e140d"/>
+  </g>
+
+  <!-- Old Class Plaque in Foreground -->
+  <rect x="180" y="325" width="240" height="50" rx="8" fill="#1a110a" stroke="#d4af37" stroke-width="2"/>
+  <text x="300" y="347" font-family="'Noto Serif Bengali', serif" font-size="14" font-weight="bold" fill="#f5deb3" text-anchor="middle">
+    মুছাপুর উচ্চ বিদ্যালয় • ১৯৮২ ব্যাচ
+  </text>
+  <text x="300" y="364" font-family="'DM Sans', sans-serif" font-size="10.5" font-weight="bold" fill="#d4af37" text-anchor="middle" letter-spacing="1.5">
+    SSC BATCH 1982 • GOLDEN MEMORIES
+  </text>
+
+  <!-- Vintage border vignette -->
+  <rect x="0" y="0" width="600" height="400" fill="none" stroke="#24170e" stroke-width="16"/>
+  <rect x="10" y="10" width="580" height="380" fill="none" stroke="#d4af37" stroke-width="1.5" opacity="0.6"/>
+</svg>
+

@@ -111,6 +111,13 @@ export default function Navbar() {
       icon: <Camera size={15} />,
     },
     {
+      id: "alumni",
+      titleBn: "অ্যালামনাই স্মৃতি",
+      titleEn: "Alumni Stories",
+      href: "#alumni-gallery",
+      icon: <GraduationCap size={15} />,
+    },
+    {
       id: "contact",
       titleBn: "যোগাযোগ",
       titleEn: "Contact",

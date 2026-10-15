@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400">
+  <defs>
+    <linearGradient id="pitchSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="70%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#93c5fd"/>
+    </linearGradient>
+    <linearGradient id="grass" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#166534"/>
+      <stop offset="100%" stop-color="#14532d"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#pitchSky)"/>
+  <rect y="220" width="600" height="180" fill="url(#grass)"/>
+  <line x1="0" y1="260" x2="600" y2="260" stroke="#f8fafc" stroke-width="2" opacity="0.6"/>
+
+  <!-- Football Goal Post Background -->
+  <line x1="120" y1="120" x2="480" y2="120" stroke="#f8fafc" stroke-width="5"/>
+  <line x1="120" y1="120" x2="120" y2="230" stroke="#f8fafc" stroke-width="5"/>
+  <line x1="480" y1="120" x2="480" y2="230" stroke="#f8fafc" stroke-width="5"/>
+
+  <!-- Team Group with Trophy -->
+  <g transform="translate(180, 160)">
+    <!-- Players in Green & Red Jerseys -->
+    <circle cx="40" cy="50" r="16" fill="#fbcfe8"/>
+    <rect x="25" y="70" width="30" height="45" rx="3" fill="#15803d"/>
+    <rect x="28" y="115" width="10" height="40" fill="#ffffff"/>
+    <rect x="42" y="115" width="10" height="40" fill="#ffffff"/>
+
+    <circle cx="100" cy="50" r="16" fill="#fbcfe8"/>
+    <rect x="85" y="70" width="30" height="45" rx="3" fill="#dc2626"/>
+    <rect x="88" y="115" width="10" height="40" fill="#ffffff"/>
+    <rect x="102" y="115" width="10" height="40" fill="#ffffff"/>
+
+    <!-- Captain holding Trophy in Center -->
+    <circle cx="160" cy="46" r="17" fill="#fbcfe8"/>
+    <rect x="145" y="66" width="30" height="45" rx="3" fill="#15803d"/>
+    <rect x="148" y="111" width="10" height="44" fill="#ffffff"/>
+    <rect x="162" y="111" width="10" height="44" fill="#ffffff"/>
+    <!-- Gold Trophy -->
+    <path d="M 150,30 L 170,30 L 166,55 Q 160,65 154,55 Z" fill="#eab308" stroke="#ca8a04" stroke-width="1.5"/>
+    <rect x="157" y="58" width="6" height="10" fill="#ca8a04"/>
+    <rect x="152" y="68" width="16" height="6" fill="#78350f" rx="1"/>
+
+    <circle cx="220" cy="50" r="16" fill="#fbcfe8"/>
+    <rect x="205" y="70" width="30" height="45" rx="3" fill="#15803d"/>
+    <rect x="208" y="115" width="10" height="40" fill="#ffffff"/>
+    <rect x="222" y="115" width="10" height="40" fill="#ffffff"/>
+
+    <!-- Football on Ground -->
+    <circle cx="120" cy="165" r="14" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>
+    <polygon points="120,158 125,162 123,167 117,167 115,162" fill="#0f172a"/>
+  </g>
+
+  <!-- Banner Bottom -->
+  <rect x="130" y="335" width="340" height="45" rx="8" fill="#064e3b" stroke="#facc15" stroke-width="1.5"/>
+  <text x="300" y="356" font-family="'Noto Serif Bengali', serif" font-size="13" font-weight="bold" fill="#ffffff" text-anchor="middle">
+    আন্তঃবিদ্যালয় ফুটবল চ্যাম্পিয়ন ১৯৯৬ • এসএসসি ৯৬ ব্যাচ
+  </text>
+  <text x="300" y="371" font-family="'DM Sans', sans-serif" font-size="9.5" font-weight="bold" fill="#fde047" text-anchor="middle" letter-spacing="1">
+    SSC BATCH 1996 • CHAMPION FOOTBALL TEAM
+  </text>
+</svg>
+

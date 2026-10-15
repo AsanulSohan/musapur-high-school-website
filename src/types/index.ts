@@ -118,3 +118,21 @@ export interface TeacherItem {
   bioBn: string;
   bioEn: string;
 }
+
+export interface AlumniStoryItem {
+  id: string;
+  nameBn: string;
+  nameEn: string;
+  batch: string; // e.g. "1982", "1996", "2005", "2014"
+  professionBn?: string;
+  professionEn?: string;
+  locationBn?: string;
+  locationEn?: string;
+  titleBn: string;
+  titleEn: string;
+  storyBn: string;
+  storyEn: string;
+  image: string;
+  submittedAt: string;
+  likes?: number;
+}
