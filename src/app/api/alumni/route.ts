@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { getAlumniStories, saveAlumniStory, incrementAlumniLike } from "@/lib/alumni-storage";
+import { normalizeBatchYear } from "@/lib/image-compression";
 
 export async function GET() {
   try {
@@ -11,10 +12,10 @@ export async function GET() {
       count: stories.length,
       stories,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("GET /api/alumni error:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to load alumni stories" },
+      { success: false, error: error?.message || "Failed to load alumni stories" },
       { status: 500 }
     );
   }
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     let nameBn = "";
     let nameEn = "";
-    let batch = "";
+    let rawBatch = "";
     let titleBn = "";
     let titleEn = "";
     let storyBn = "";
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
 
       nameBn = (formData.get("nameBn") as string) || (formData.get("name") as string) || "";
       nameEn = (formData.get("nameEn") as string) || nameBn;
-      batch = (formData.get("batch") as string) || "";
+      rawBatch = (formData.get("batch") as string) || "";
       titleBn = (formData.get("titleBn") as string) || (formData.get("title") as string) || "";
       titleEn = (formData.get("titleEn") as string) || titleBn;
       storyBn = (formData.get("storyBn") as string) || (formData.get("story") as string) || "";
@@ -52,34 +53,47 @@ export async function POST(req: NextRequest) {
       locationBn = (formData.get("locationBn") as string) || (formData.get("location") as string) || "";
       locationEn = (formData.get("locationEn") as string) || locationBn;
 
+      const photoBase64 = (formData.get("photoBase64") as string) || "";
       const file = formData.get("photo") as File | null;
+
+      if (photoBase64 && photoBase64.startsWith("data:image/")) {
+        imageUrl = photoBase64;
+      }
+
       if (file && file.size > 0) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
+        const mimeType = file.type || "image/jpeg";
+        const base64DataUri = `data:${mimeType};base64,${buffer.toString("base64")}`;
 
-        // Sanitize file extension
-        const originalName = file.name || "photo.jpg";
-        const ext = path.extname(originalName).toLowerCase() || ".jpg";
-        const allowedExts = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"];
-        const safeExt = allowedExts.includes(ext) ? ext : ".jpg";
+        // Attempt writing to local filesystem (works on local dev)
+        try {
+          const originalName = file.name || "photo.jpg";
+          const ext = path.extname(originalName).toLowerCase() || ".jpg";
+          const allowedExts = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"];
+          const safeExt = allowedExts.includes(ext) ? ext : ".jpg";
 
-        const fileName = `alumni-${Date.now()}-${Math.random().toString(36).substring(2, 6)}${safeExt}`;
-        const uploadDir = path.join(process.cwd(), "public", "alumni");
+          const fileName = `alumni-${Date.now()}-${Math.random().toString(36).substring(2, 6)}${safeExt}`;
+          const uploadDir = path.join(process.cwd(), "public", "alumni");
 
-        if (!fs.existsSync(uploadDir)) {
-          fs.mkdirSync(uploadDir, { recursive: true });
+          if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+          }
+
+          const filePath = path.join(uploadDir, fileName);
+          fs.writeFileSync(filePath, buffer);
+          imageUrl = `/alumni/${fileName}`;
+        } catch {
+          // On Vercel read-only filesystem, use the Data URI directly
+          imageUrl = base64DataUri;
         }
-
-        const filePath = path.join(uploadDir, fileName);
-        fs.writeFileSync(filePath, buffer);
-        imageUrl = `/alumni/${fileName}`;
       }
     } else {
       // JSON payload
       const body = await req.json();
       nameBn = body.nameBn || body.name || "";
       nameEn = body.nameEn || nameBn;
-      batch = body.batch || "";
+      rawBatch = body.batch || "";
       titleBn = body.titleBn || body.title || "";
       titleEn = body.titleEn || titleBn;
       storyBn = body.storyBn || body.story || "";
@@ -88,8 +102,11 @@ export async function POST(req: NextRequest) {
       professionEn = body.professionEn || professionBn;
       locationBn = body.locationBn || body.location || "";
       locationEn = body.locationEn || locationBn;
-      imageUrl = body.image || imageUrl;
+      imageUrl = body.photoBase64 || body.image || imageUrl;
     }
+
+    // Clean & normalize batch year (handles "ব্যাচ : ২০১৯", "২০১৯", etc.)
+    const cleanBatch = normalizeBatchYear(rawBatch);
 
     // Validation
     if (!nameBn.trim()) {
@@ -98,15 +115,15 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    if (!batch.trim()) {
+    if (!cleanBatch.trim()) {
       return NextResponse.json(
-        { success: false, error: "SSC Batch year is required." },
+        { success: false, error: "Valid SSC Batch year is required." },
         { status: 400 }
       );
     }
     if (!storyBn.trim()) {
       return NextResponse.json(
-        { success: false, error: "Story/memory description is required." },
+        { success: false, error: "Story or memory description is required." },
         { status: 400 }
       );
     }
@@ -114,9 +131,9 @@ export async function POST(req: NextRequest) {
     const savedStory = await saveAlumniStory({
       nameBn: nameBn.trim(),
       nameEn: nameEn.trim(),
-      batch: batch.trim(),
-      titleBn: titleBn.trim() || `স্মৃতিচারণ • এসএসসি ${batch.trim()} ব্যাচ`,
-      titleEn: titleEn.trim() || `Memories • SSC Batch ${batch.trim()}`,
+      batch: cleanBatch.trim(),
+      titleBn: titleBn.trim() || `স্মৃতিচারণ • এসএসসি ${cleanBatch.trim()} ব্যাচ`,
+      titleEn: titleEn.trim() || `Memories • SSC Batch ${cleanBatch.trim()}`,
       storyBn: storyBn.trim(),
       storyEn: storyEn.trim(),
       professionBn: professionBn.trim() || undefined,
@@ -131,10 +148,10 @@ export async function POST(req: NextRequest) {
       message: "Alumni story uploaded successfully!",
       story: savedStory,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("POST /api/alumni error:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to submit alumni story." },
+      { success: false, error: error?.message || "Failed to submit alumni story." },
       { status: 500 }
     );
   }
@@ -148,8 +165,10 @@ export async function PATCH(req: NextRequest) {
     }
     const newLikes = await incrementAlumniLike(id);
     return NextResponse.json({ success: true, likes: newLikes });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: "Failed to like" }, { status: 500 });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: error?.message || "Failed to update like" },
+      { status: 500 }
+    );
   }
 }
-

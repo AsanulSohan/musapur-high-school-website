@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Modal from "./Modal";
 import AlumniUploadForm from "./AlumniUploadForm";
+import { normalizeBatchYear } from "@/lib/image-compression";
 
 interface AlumniGalleryGridProps {
   initialStories?: AlumniStoryItem[];
@@ -37,19 +38,44 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
   const [selectedStory, setSelectedStory] = useState<AlumniStoryItem | null>(null);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
 
-  // Fetch stories on mount from API
+  // Fetch stories on mount from API and merge with local cache
   useEffect(() => {
     async function loadStories() {
+      // 1. Read locally cached submissions
+      let localStories: AlumniStoryItem[] = [];
+      try {
+        const cached = localStorage.getItem("mhs_alumni_stories_cache");
+        if (cached) {
+          localStories = JSON.parse(cached);
+        }
+      } catch {}
+
       try {
         const res = await fetch("/api/alumni");
         if (res.ok) {
           const data = await res.json();
           if (data.success && Array.isArray(data.stories)) {
-            setStories(data.stories);
+            const combinedMap = new Map<string, AlumniStoryItem>();
+            localStories.forEach((s) => combinedMap.set(s.id, s));
+            data.stories.forEach((s: AlumniStoryItem) => combinedMap.set(s.id, s));
+            const merged = Array.from(combinedMap.values()).sort(
+              (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+            );
+            setStories(merged);
+            return;
           }
         }
       } catch (err) {
         console.error("Failed to load alumni stories:", err);
+      }
+
+      if (localStories.length > 0) {
+        setStories((prev) => {
+          const map = new Map<string, AlumniStoryItem>();
+          localStories.forEach((s) => map.set(s.id, s));
+          prev.forEach((s) => map.set(s.id, s));
+          return Array.from(map.values());
+        });
       }
     }
     loadStories();
@@ -77,14 +103,18 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
   };
 
   const handleUploadSuccess = (newStory: AlumniStoryItem) => {
-    setStories((prev) => [newStory, ...prev]);
+    setStories((prev) => {
+      const filtered = prev.filter((s) => s.id !== newStory.id);
+      return [newStory, ...filtered];
+    });
     setIsUploadOpen(false);
   };
 
   // Filter by decade/batch
   const filterByDecade = (story: AlumniStoryItem, decade: string) => {
     if (decade === "all") return true;
-    const year = parseInt(story.batch, 10);
+    const cleanYear = normalizeBatchYear(story.batch);
+    const year = parseInt(cleanYear, 10);
     if (isNaN(year)) return true;
 
     if (decade === "70s-80s") return year < 1990;
@@ -202,6 +232,7 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
                     fill
                     className="object-cover transition duration-500 group-hover:scale-108"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    unoptimized={item.image.startsWith("data:")}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-75 group-hover:opacity-85 transition" />
 
@@ -209,7 +240,7 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
                   <div className="absolute top-3 left-3">
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900/85 backdrop-blur-xs text-amber-300 text-[10px] font-bold border border-amber-400/40 shadow-xs font-mono">
                       <GraduationCap size={11} />
-                      <span>SSC '{item.batch.slice(-2)}</span>
+                      <span>SSC &apos;{normalizeBatchYear(item.batch).slice(-2) || item.batch}</span>
                     </span>
                   </div>
 
@@ -344,6 +375,7 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
                 fill
                 className="object-contain"
                 priority
+                unoptimized={selectedStory.image.startsWith("data:")}
               />
             </div>
 
