@@ -181,6 +181,15 @@ export default function TopHeaderBar() {
               <span className="text-xs font-bold text-emerald-700">nctb.gov.bd ↗</span>
             </a>
           </div>
+          <div className="pt-2 border-t border-slate-100 flex justify-end">
+            <a
+              href="#teachers"
+              onClick={() => setActiveZoneModal(null)}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#064e3b] text-white text-xs font-bold rounded-lg hover:bg-[#0d5c4a] transition"
+            >
+              {isBn ? "সকল শিক্ষক তালিকা ও প্রোফাইল দেখুন" : "View Full Faculty Directory"}
+            </a>
+          </div>
         </div>
       </Modal>
 

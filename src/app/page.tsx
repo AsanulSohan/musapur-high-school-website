@@ -12,6 +12,7 @@ import AcademicPrograms from "@/components/AcademicPrograms";
 import AboutSection from "@/components/AboutSection";
 import PhotoGalleryMarquee from "@/components/PhotoGalleryMarquee";
 import SchoolStatsSection from "@/components/SchoolStatsSection";
+import TeachersSection from "@/components/TeachersSection";
 import ImportantLinksSidebar from "@/components/ImportantLinksSidebar";
 import Footer from "@/components/Footer";
 
@@ -66,10 +67,13 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 7. Auto-Scrolling Right-to-Left Photo Gallery Marquee with Hover Pause */}
+          {/* 7. Dedicated Teachers Directory & Profiles */}
+          <TeachersSection />
+
+          {/* 8. Auto-Scrolling Right-to-Left Photo Gallery Marquee with Hover Pause */}
           <PhotoGalleryMarquee initialItems={galleryItems} />
 
-          {/* 8. Institutional Key Statistics & Figures */}
+          {/* 9. Institutional Key Statistics & Figures */}
           <SchoolStatsSection />
         </main>
 

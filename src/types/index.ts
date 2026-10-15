@@ -97,3 +97,24 @@ export interface ImportantLink {
   badgeBn?: string;
   badgeEn?: string;
 }
+
+export interface TeacherItem {
+  id: string;
+  nameBn: string;
+  nameEn: string;
+  designationBn: string;
+  designationEn: string;
+  department: "admin" | "science" | "humanities" | "business" | "ict";
+  departmentBn: string;
+  departmentEn: string;
+  subjectBn: string;
+  subjectEn: string;
+  qualificationBn: string;
+  qualificationEn: string;
+  joiningYear?: string;
+  phone?: string;
+  email?: string;
+  image: string;
+  bioBn: string;
+  bioEn: string;
+}

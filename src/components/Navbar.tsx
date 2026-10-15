@@ -68,7 +68,7 @@ export default function Navbar() {
       children: [
         { titleBn: "সভাপতির বাণী", titleEn: "Chairman's Message", href: "#leadership" },
         { titleBn: "প্রধান শিক্ষকের বাণী", titleEn: "Headmaster's Message", href: "#leadership" },
-        { titleBn: "শিক্ষক ও কর্মচারী তালিকা", titleEn: "Faculty & Staff Directory", href: "#stats" },
+        { titleBn: "শিক্ষক ও কর্মচারী তালিকা", titleEn: "Faculty & Staff Directory", href: "#teachers" },
       ],
     },
     {
