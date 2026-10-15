@@ -81,17 +81,6 @@ export const NOTICES_DATA: NoticeItem[] = [
     isUrgent: false,
     fileSize: "160 KB",
   },
-  {
-    id: "notice-07",
-    titleBn: "শেখ রাসেল ডিজিটাল ল্যাবে কম্পিউটার ও আইসিটি ব্যবহারিক কর্মশালা",
-    titleEn: "ICT & Computer Practical Workshop at Sheikh Russell Digital Lab",
-    dateBn: "১৫ সেপ্টেম্বর ২০২৬",
-    dateEn: "15 Sep 2026",
-    publishDate: "2026-09-15",
-    category: "academic",
-    isUrgent: false,
-    fileSize: "310 KB",
-  },
 ];
 
 /* =========================================================================
