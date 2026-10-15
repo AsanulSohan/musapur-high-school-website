@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import { AlumniStoryItem } from "@/types";
+import { getSupabase } from "./supabase";
 
 const DATA_FILE_PATH = path.join(process.cwd(), "src", "data", "alumni-stories.json");
 const TMP_DATA_FILE_PATH = path.join(os.tmpdir(), "mhs-alumni-stories.json");
@@ -10,25 +11,81 @@ const TMP_DATA_FILE_PATH = path.join(os.tmpdir(), "mhs-alumni-stories.json");
 const memoryStoriesCache: AlumniStoryItem[] = [];
 
 /**
- * Reads all alumni stories from persistent storage (JSON, /tmp, or in-memory cache).
+ * Reads initial static stories from the bundled JSON file.
  */
-export async function getAlumniStories(): Promise<AlumniStoryItem[]> {
-  const storiesMap = new Map<string, AlumniStoryItem>();
-
-  // 1. Read base stories from src/data/alumni-stories.json
+function getStaticStories(): AlumniStoryItem[] {
   try {
     if (fs.existsSync(DATA_FILE_PATH)) {
       const fileContent = fs.readFileSync(DATA_FILE_PATH, "utf-8");
       const parsed: AlumniStoryItem[] = JSON.parse(fileContent);
-      if (Array.isArray(parsed)) {
-        parsed.forEach((s) => storiesMap.set(s.id, s));
-      }
+      if (Array.isArray(parsed)) return parsed;
     }
   } catch (error) {
     console.warn("Could not read base stories file:", error);
   }
+  return [];
+}
 
-  // 2. Read ephemeral serverless stories from os.tmpdir()
+/**
+ * Reads all alumni stories from persistent storage (Supabase / JSON / /tmp / Memory).
+ */
+export async function getAlumniStories(): Promise<AlumniStoryItem[]> {
+  const supabase = getSupabase();
+
+  // 1. If Supabase is connected, fetch from cloud database
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from("alumni_stories")
+        .select("*")
+        .order("submittedAt", { ascending: false });
+
+      if (!error && Array.isArray(data)) {
+        const storiesMap = new Map<string, AlumniStoryItem>();
+        // Add cloud stories
+        data.forEach((item: any) => {
+          storiesMap.set(item.id, {
+            id: item.id,
+            nameBn: item.nameBn || item.name_bn || "",
+            nameEn: item.nameEn || item.name_en || item.nameBn || "",
+            batch: item.batch || "",
+            professionBn: item.professionBn || item.profession_bn || undefined,
+            professionEn: item.professionEn || item.profession_en || undefined,
+            locationBn: item.locationBn || item.location_bn || undefined,
+            locationEn: item.locationEn || item.location_en || undefined,
+            titleBn: item.titleBn || item.title_bn || "",
+            titleEn: item.titleEn || item.title_en || item.titleBn || "",
+            storyBn: item.storyBn || item.story_bn || "",
+            storyEn: item.storyEn || item.story_en || item.storyBn || "",
+            image: item.image || "/alumni/alumni-1982-batch.svg",
+            submittedAt: item.submittedAt || item.submitted_at || new Date().toISOString(),
+            likes: Number(item.likes) || 1,
+          });
+        });
+
+        // Merge baseline static stories so the initial school memories are always present
+        const staticStories = getStaticStories();
+        staticStories.forEach((s) => {
+          if (!storiesMap.has(s.id)) {
+            storiesMap.set(s.id, s);
+          }
+        });
+
+        return Array.from(storiesMap.values()).sort(
+          (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+        );
+      }
+    } catch (sbErr) {
+      console.warn("Supabase query failed, falling back to local storage:", sbErr);
+    }
+  }
+
+  // 2. Fallback: Read from local JSON, /tmp, and in-memory cache
+  const storiesMap = new Map<string, AlumniStoryItem>();
+
+  const staticStories = getStaticStories();
+  staticStories.forEach((s) => storiesMap.set(s.id, s));
+
   try {
     if (fs.existsSync(TMP_DATA_FILE_PATH)) {
       const tmpContent = fs.readFileSync(TMP_DATA_FILE_PATH, "utf-8");
@@ -41,10 +98,8 @@ export async function getAlumniStories(): Promise<AlumniStoryItem[]> {
     console.warn("Could not read tmp stories file:", error);
   }
 
-  // 3. Read in-memory cached stories
   memoryStoriesCache.forEach((s) => storiesMap.set(s.id, s));
 
-  // Convert to array and sort latest first
   const allStories = Array.from(storiesMap.values());
   return allStories.sort(
     (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
@@ -52,8 +107,7 @@ export async function getAlumniStories(): Promise<AlumniStoryItem[]> {
 }
 
 /**
- * Saves a new alumni story to persistent storage.
- * Gracefully handles read-only filesystems (like Vercel serverless functions).
+ * Saves a new alumni story to persistent storage (Supabase or local fallback).
  */
 export async function saveAlumniStory(
   data: Omit<AlumniStoryItem, "id" | "submittedAt" | "likes">
@@ -65,22 +119,91 @@ export async function saveAlumniStory(
     likes: 1,
   };
 
-  // Keep in memory
+  const supabase = getSupabase();
+
+  // 1. If Supabase is connected, save directly to Supabase cloud
+  if (supabase) {
+    try {
+      let finalImageUrl = newStory.image;
+
+      // If image is a base64 string, optionally upload to Supabase Storage bucket
+      if (finalImageUrl.startsWith("data:image/")) {
+        try {
+          const match = finalImageUrl.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,(.+)$/);
+          if (match) {
+            const mimeType = match[1];
+            const base64Data = match[2];
+            const buffer = Buffer.from(base64Data, "base64");
+            const ext = mimeType.split("/")[1] || "jpg";
+            const storageFileName = `alumni/${newStory.id}.${ext}`;
+
+            const { error: uploadError } = await supabase.storage
+              .from("alumni-photos")
+              .upload(storageFileName, buffer, {
+                contentType: mimeType,
+                upsert: true,
+              });
+
+            if (!uploadError) {
+              const { data: publicUrlData } = supabase.storage
+                .from("alumni-photos")
+                .getPublicUrl(storageFileName);
+              if (publicUrlData?.publicUrl) {
+                finalImageUrl = publicUrlData.publicUrl;
+              }
+            }
+          }
+        } catch (storageErr) {
+          console.warn("Storage upload warning, saving base64 in row:", storageErr);
+        }
+      }
+
+      newStory.image = finalImageUrl;
+
+      // Insert row into database table
+      const { error: insertError } = await supabase.from("alumni_stories").insert([
+        {
+          id: newStory.id,
+          nameBn: newStory.nameBn,
+          nameEn: newStory.nameEn,
+          batch: newStory.batch,
+          professionBn: newStory.professionBn || null,
+          professionEn: newStory.professionEn || null,
+          locationBn: newStory.locationBn || null,
+          locationEn: newStory.locationEn || null,
+          titleBn: newStory.titleBn,
+          titleEn: newStory.titleEn,
+          storyBn: newStory.storyBn,
+          storyEn: newStory.storyEn,
+          image: newStory.image,
+          submittedAt: newStory.submittedAt,
+          likes: newStory.likes,
+        },
+      ]);
+
+      if (!insertError) {
+        return newStory;
+      } else {
+        console.warn("Supabase insert error, falling back to local:", insertError);
+      }
+    } catch (sbErr) {
+      console.warn("Supabase save exception:", sbErr);
+    }
+  }
+
+  // 2. Fallback: Save to memory and local/tmp files
   memoryStoriesCache.unshift(newStory);
 
-  // Try saving to project data directory (works on local dev and dedicated servers)
   let savedToLocal = false;
   try {
     const existing = await getAlumniStories();
     const updated = [newStory, ...existing.filter((s) => s.id !== newStory.id)];
     fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(updated, null, 2), "utf-8");
     savedToLocal = true;
-  } catch (fsErr) {
+  } catch {
     // Expected on Vercel read-only filesystem (EROFS)
-    // console.info("Local filesystem is read-only (Vercel). Falling back to /tmp storage.");
   }
 
-  // Fallback to /tmp if local filesystem write failed
   if (!savedToLocal) {
     try {
       let tmpStories: AlumniStoryItem[] = [];
@@ -98,9 +221,32 @@ export async function saveAlumniStory(
 }
 
 /**
- * Increments like counter for a story.
+ * Increments like counter for a story in Supabase or local storage.
  */
 export async function incrementAlumniLike(id: string): Promise<number> {
+  const supabase = getSupabase();
+
+  if (supabase) {
+    try {
+      const { data } = await supabase
+        .from("alumni_stories")
+        .select("likes")
+        .eq("id", id)
+        .single();
+
+      const newLikes = (Number(data?.likes) || 0) + 1;
+
+      await supabase
+        .from("alumni_stories")
+        .update({ likes: newLikes })
+        .eq("id", id);
+
+      return newLikes;
+    } catch (err) {
+      console.warn("Supabase like update failed:", err);
+    }
+  }
+
   try {
     const stories = await getAlumniStories();
     const story = stories.find((s) => s.id === id);
@@ -108,17 +254,14 @@ export async function incrementAlumniLike(id: string): Promise<number> {
 
     story.likes = (story.likes || 0) + 1;
 
-    // Update in memory cache
     const memIdx = memoryStoriesCache.findIndex((s) => s.id === id);
     if (memIdx >= 0) {
       memoryStoriesCache[memIdx].likes = story.likes;
     }
 
-    // Try saving locally
     try {
       fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(stories, null, 2), "utf-8");
     } catch {
-      // Fallback to tmp
       try {
         fs.writeFileSync(TMP_DATA_FILE_PATH, JSON.stringify(stories, null, 2), "utf-8");
       } catch {}
