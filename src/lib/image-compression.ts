@@ -9,6 +9,41 @@ export interface CompressionResult {
   originalSizeKB: number;
   compressedSizeKB: number;
 }
+export const BN_TO_EN_MAP: Record<string, string> = {
+  "০": "0",
+  "১": "1",
+  "২": "2",
+  "৩": "3",
+  "৪": "4",
+  "৫": "5",
+  "৬": "6",
+  "৭": "7",
+  "৮": "8",
+  "৯": "9",
+};
+
+export const EN_TO_BN_MAP: Record<string, string> = {
+  "0": "০",
+  "1": "১",
+  "2": "২",
+  "3": "৩",
+  "4": "৪",
+  "5": "৫",
+  "6": "৬",
+  "7": "৭",
+  "8": "৮",
+  "9": "৯",
+};
+
+export function toEnglishDigits(input: string): string {
+  if (!input) return "";
+  return input.replace(/[০-৯]/g, (digit) => BN_TO_EN_MAP[digit] || digit);
+}
+
+export function toBanglaDigits(input: string | number): string {
+  if (input === undefined || input === null) return "";
+  return String(input).replace(/[0-9]/g, (digit) => EN_TO_BN_MAP[digit] || digit);
+}
 
 /**
  * Normalizes user input for SSC batch year.
@@ -18,21 +53,8 @@ export interface CompressionResult {
 export function normalizeBatchYear(input: string): string {
   if (!input) return "";
 
-  const bnToEnMap: Record<string, string> = {
-    "০": "0",
-    "১": "1",
-    "২": "2",
-    "৩": "3",
-    "৪": "4",
-    "৫": "5",
-    "৬": "6",
-    "৭": "7",
-    "৮": "8",
-    "৯": "9",
-  };
-
   // Convert any Bengali numerals to English digits
-  let str = input.replace(/[০-৯]/g, (digit) => bnToEnMap[digit] || digit);
+  let str = toEnglishDigits(input);
 
   // Extract 4-digit year like 1982, 1999, 2019, 2025
   const yearMatch = str.match(/(?:19|20)\d{2}/);

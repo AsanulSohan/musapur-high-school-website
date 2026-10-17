@@ -22,10 +22,11 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowLeftRight,
+  X,
 } from "lucide-react";
 import Modal from "./Modal";
 import AlumniUploadForm from "./AlumniUploadForm";
-import { normalizeBatchYear } from "@/lib/image-compression";
+import { normalizeBatchYear, toBanglaDigits, toEnglishDigits } from "@/lib/image-compression";
 
 interface AlumniGalleryGridProps {
   initialStories?: AlumniStoryItem[];
@@ -89,11 +90,11 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
               if (!EXCLUDED_IDS.has(s.id)) combinedMap.set(s.id, s);
             });
 
-            // Deduplicate by name + batch + title
+            // Deduplicate by batch + title to avoid duplicate submissions
             const seen = new Set<string>();
             const unique: AlumniStoryItem[] = [];
             for (const s of combinedMap.values()) {
-              const k = `${s.nameBn.trim().toLowerCase()}_${s.batch.trim()}_${s.titleBn.trim().toLowerCase()}`;
+              const k = `${s.batch.trim()}_${s.titleBn.trim().toLowerCase()}`;
               if (seen.has(k)) continue;
               seen.add(k);
               unique.push(s);
@@ -167,15 +168,66 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
   };
 
   const filteredStories = stories.filter((story) => {
-    const matchesDecade = filterByDecade(story, selectedDecade);
-    const q = searchQuery.toLowerCase();
-    const matchesSearch =
-      story.nameBn.toLowerCase().includes(q) ||
-      story.nameEn.toLowerCase().includes(q) ||
-      story.batch.includes(q) ||
-      story.titleBn.toLowerCase().includes(q) ||
-      story.storyBn.toLowerCase().includes(q) ||
-      (story.professionBn && story.professionBn.toLowerCase().includes(q));
+    // 1. Decade matching
+    const matchesDecade = selectedDecade === "all" || filterByDecade(story, selectedDecade);
+
+    // 2. Search matching
+    const trimmedQ = searchQuery.trim().toLowerCase();
+    if (!trimmedQ) return matchesDecade;
+
+    // Batch normalization in both English & Bangla numerals
+    const cleanBatchEn = normalizeBatchYear(story.batch);
+    const cleanBatchBn = toBanglaDigits(cleanBatchEn);
+    const shortBatchEn = cleanBatchEn.slice(-2);
+    const shortBatchBn = cleanBatchBn.slice(-2);
+
+    // Comprehensive searchable corpus for this story
+    const corpus = [
+      story.nameBn,
+      story.nameEn,
+      story.batch,
+      cleanBatchEn,
+      cleanBatchBn,
+      shortBatchEn,
+      shortBatchBn,
+      `ssc ${cleanBatchEn}`,
+      `ssc ${shortBatchEn}`,
+      `ssc '${shortBatchEn}`,
+      `ssc '${cleanBatchEn}`,
+      `এসএসসি ${cleanBatchBn}`,
+      `এসএসসি ${shortBatchBn}`,
+      `এসএসসি ’${shortBatchBn}`,
+      `এসএসসি '${shortBatchBn}`,
+      `এসএসসি ${cleanBatchBn} ব্যাচ`,
+      `এসএসসি ${cleanBatchEn} batch`,
+      `${cleanBatchBn} ব্যাচ`,
+      `${cleanBatchEn} batch`,
+      `${cleanBatchBn} সাল`,
+      `${cleanBatchEn} year`,
+      story.titleBn,
+      story.titleEn,
+      story.storyBn,
+      story.storyEn,
+      story.professionBn || "",
+      story.professionEn || "",
+      story.locationBn || "",
+      story.locationEn || "",
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    // Query tokens: each word/numeral in search query
+    const tokens = trimmedQ.split(/\s+/).filter(Boolean);
+    const matchesSearch = tokens.every((token) => {
+      const tokenEn = toEnglishDigits(token);
+      const tokenBn = toBanglaDigits(token);
+      return (
+        corpus.includes(token) ||
+        corpus.includes(tokenEn) ||
+        corpus.includes(tokenBn)
+      );
+    });
 
     return matchesDecade && matchesSearch;
   });
@@ -250,10 +302,26 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={isBn ? "স্মৃতি বা ব্যাচ খুঁজুন..." : "Search memory or batch..."}
-                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-emerald-600 bg-slate-50 font-bangla"
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (e.target.value.trim() && selectedDecade !== "all") {
+                    setSelectedDecade("all");
+                  }
+                }}
+                placeholder={isBn ? "স্মৃতি বা ব্যাচ খুঁজুন (যেমন: ২০১৯)..." : "Search memory or batch (e.g. 2019)..."}
+                className="w-full pl-8 pr-8 py-1.5 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-emerald-600 bg-slate-50 font-bangla"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                  title={isBn ? "মুছুন" : "Clear"}
+                  aria-label="Clear search"
+                >
+                  <X size={13} />
+                </button>
+              )}
             </div>
 
             {/* Slider Navigation Buttons */}
@@ -321,7 +389,11 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
                     <div className="absolute top-3 left-3">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900/85 backdrop-blur-xs text-amber-300 text-[10px] font-bold border border-amber-400/40 shadow-xs font-mono">
                         <GraduationCap size={11} />
-                        <span>SSC &apos;{normalizeBatchYear(item.batch).slice(-2) || item.batch}</span>
+                        <span>
+                          {isBn
+                            ? `এসএসসি ’${toBanglaDigits(normalizeBatchYear(item.batch).slice(-2)) || toBanglaDigits(item.batch)}`
+                            : `SSC '${normalizeBatchYear(item.batch).slice(-2) || item.batch}`}
+                        </span>
                       </span>
                     </div>
 
@@ -425,21 +497,45 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
           <div className="text-center py-16 bg-white rounded-3xl border border-slate-200/80 mt-6 p-8">
             <Camera size={40} className="mx-auto mb-3 text-slate-300" />
             <h4 className="font-bangla-serif text-lg font-bold text-slate-700">
-              {isBn ? "এই ব্যাচের কোনো স্মৃতি এখনো যুক্ত করা হয়নি" : "No memories found for this batch"}
+              {searchQuery.trim()
+                ? isBn
+                  ? `"${searchQuery}" এর জন্য কোনো স্মৃতি খুঁজে পাওয়া যায়নি`
+                  : `No memories found matching "${searchQuery}"`
+                : isBn
+                ? "এই ব্যাচের কোনো স্মৃতি এখনো যুক্ত করা হয়নি"
+                : "No memories found for this batch"}
             </h4>
             <p className="font-bangla text-xs text-slate-500 mt-1 max-w-md mx-auto">
-              {isBn
+              {searchQuery.trim()
+                ? isBn
+                  ? "বানান বা ব্যাচের সাল (যেমন: ২০১৯ বা 2019) সঠিক কিনা দেখে নিন অথবা সকল স্মৃতি দেখতে রিসেট করুন।"
+                  : "Check the spelling or batch year (e.g. 2019), or reset search to view all stories."
+                : isBn
                 ? "আপনি কি এই ব্যাচের প্রাক্তন শিক্ষার্থী? আপনার স্কুলের সোনালী স্মৃতি ও ছবি সবার সাথে প্রথম শেয়ার করুন।"
                 : "Are you an alumnus from this era? Be the first to share your golden school memories."}
             </p>
-            <button
-              type="button"
-              onClick={() => setIsUploadOpen(true)}
-              className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#064e3b] hover:bg-[#0d5c4a] text-white text-xs font-bold transition"
-            >
-              <PlusCircle size={15} />
-              <span>{isBn ? "ছবি ও স্মৃতি যোগ করুন" : "Upload Memory Now"}</span>
-            </button>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              {searchQuery.trim() && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedDecade("all");
+                  }}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition font-bangla cursor-pointer"
+                >
+                  {isBn ? "সকল স্মৃতি দেখুন" : "View All Stories"}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsUploadOpen(true)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#064e3b] hover:bg-[#0d5c4a] text-white text-xs font-bold transition cursor-pointer"
+              >
+                <PlusCircle size={15} />
+                <span>{isBn ? "ছবি ও স্মৃতি যোগ করুন" : "Upload Memory Now"}</span>
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -486,7 +582,9 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl bg-slate-50 border border-slate-100">
               <div>
                 <span className="inline-block px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-900 font-bold text-xs font-mono mb-1">
-                  SSC Batch: {selectedStory.batch}
+                  {isBn
+                    ? `এসএসসি ব্যাচ: ${toBanglaDigits(selectedStory.batch)}`
+                    : `SSC Batch: ${selectedStory.batch}`}
                 </span>
                 <h4 className="font-bangla-serif text-base font-bold text-slate-900">
                   {isBn ? selectedStory.nameBn : selectedStory.nameEn}

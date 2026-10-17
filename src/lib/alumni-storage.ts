@@ -46,8 +46,8 @@ function processAndDeduplicate(stories: AlumniStoryItem[]): AlumniStoryItem[] {
 
   for (const s of stories) {
     if (EXCLUDED_STORY_IDS.has(s.id)) continue;
-    // Normalize key: name + batch + title
-    const key = `${s.nameBn.trim().toLowerCase()}_${s.batch.trim()}_${s.titleBn.trim().toLowerCase()}`;
+    // Normalize key: batch + title
+    const key = `${s.batch.trim()}_${s.titleBn.trim().toLowerCase()}`;
     if (seenKeys.has(key)) continue;
     seenKeys.add(key);
     result.push(s);
