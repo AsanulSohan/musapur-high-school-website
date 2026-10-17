@@ -177,33 +177,12 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
 
     // Batch normalization in both English & Bangla numerals
     const cleanBatchEn = normalizeBatchYear(story.batch);
-    const cleanBatchBn = toBanglaDigits(cleanBatchEn);
     const shortBatchEn = cleanBatchEn.slice(-2);
-    const shortBatchBn = cleanBatchBn.slice(-2);
 
-    // Comprehensive searchable corpus for this story
-    const corpus = [
+    // General text corpus (names, professions, locations, titles, story narratives)
+    const generalCorpus = [
       story.nameBn,
       story.nameEn,
-      story.batch,
-      cleanBatchEn,
-      cleanBatchBn,
-      shortBatchEn,
-      shortBatchBn,
-      `ssc ${cleanBatchEn}`,
-      `ssc ${shortBatchEn}`,
-      `ssc '${shortBatchEn}`,
-      `ssc '${cleanBatchEn}`,
-      `এসএসসি ${cleanBatchBn}`,
-      `এসএসসি ${shortBatchBn}`,
-      `এসএসসি ’${shortBatchBn}`,
-      `এসএসসি '${shortBatchBn}`,
-      `এসএসসি ${cleanBatchBn} ব্যাচ`,
-      `এসএসসি ${cleanBatchEn} batch`,
-      `${cleanBatchBn} ব্যাচ`,
-      `${cleanBatchEn} batch`,
-      `${cleanBatchBn} সাল`,
-      `${cleanBatchEn} year`,
       story.titleBn,
       story.titleEn,
       story.storyBn,
@@ -220,12 +199,37 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
     // Query tokens: each word/numeral in search query
     const tokens = trimmedQ.split(/\s+/).filter(Boolean);
     const matchesSearch = tokens.every((token) => {
-      const tokenEn = toEnglishDigits(token);
-      const tokenBn = toBanglaDigits(token);
+      const cleanToken = token.replace(/['’]/g, "");
+      const tokenEn = toEnglishDigits(cleanToken);
+      const tokenBn = toBanglaDigits(cleanToken);
+
+      // Check if this token is a 4-digit batch year like 2014, 2019, 2008 (in English or Bangla)
+      const is4DigitYear = /^(?:19|20)\d{2}$/.test(tokenEn);
+      if (is4DigitYear) {
+        // MUST match the alumnus's actual SSC graduation batch year!
+        return cleanBatchEn === tokenEn;
+      }
+
+      // Check if this token is a 2-digit batch year like '14, '19, ’১৯
+      const is2DigitYear =
+        /^\d{2}$/.test(tokenEn) &&
+        (token.startsWith("'") || token.startsWith("’") || tokens.length === 1);
+      if (is2DigitYear) {
+        return shortBatchEn === tokenEn;
+      }
+
+      // Check if it's a batch keyword filler like "ব্যাচ", "batch", "সাল", "ssc", "এসএসসি"
+      const isBatchKeyword = /^(ব্যাচ|ব্যাচের|ব্যাচে|batch|সাল|সালে|সালের|year|ssc|এসএসসি)$/i.test(token);
+      if (isBatchKeyword) {
+        // If part of a combined query (like "2014 ব্যাচ"), the keyword is satisfied
+        return true;
+      }
+
+      // General text token: search in names, titles, profession, location, and story narrative
       return (
-        corpus.includes(token) ||
-        corpus.includes(tokenEn) ||
-        corpus.includes(tokenBn)
+        generalCorpus.includes(token) ||
+        generalCorpus.includes(tokenEn) ||
+        generalCorpus.includes(tokenBn)
       );
     });
 
