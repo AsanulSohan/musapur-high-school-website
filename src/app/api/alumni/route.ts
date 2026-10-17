@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     let professionEn = "";
     let locationBn = "";
     let locationEn = "";
-    let imageUrl = "/alumni/alumni-1982-batch.svg"; // Default fallback
+    let imageUrl = "/logo.png"; // Default fallback
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await req.formData();

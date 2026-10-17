@@ -10,11 +10,15 @@ const TMP_DATA_FILE_PATH = path.join(os.tmpdir(), "mhs-alumni-stories.json");
 // In-memory cache for serverless runtimes when disk writes are restricted
 const memoryStoriesCache: AlumniStoryItem[] = [];
 
-// IDs to explicitly exclude from displaying (test stories and duplicates)
+// IDs to explicitly exclude from displaying (test stories, duplicates, and removed mock/dummy stories)
 export const EXCLUDED_STORY_IDS = new Set([
   "test-check-connection",
   "alumni-1792104318857-3edll",
   "alumni-1792104703795-aibab", // duplicate Anwar Hossain (keeps clean local one)
+  "alumni-2014-04",
+  "alumni-2005-03",
+  "alumni-1996-02",
+  "alumni-1982-01",
 ]);
 
 /**
@@ -86,7 +90,7 @@ export async function getAlumniStories(): Promise<AlumniStoryItem[]> {
             titleEn: item.titleEn || item.title_en || item.titleBn || "",
             storyBn: item.storyBn || item.story_bn || "",
             storyEn: item.storyEn || item.story_en || item.storyBn || "",
-            image: item.image || "/alumni/alumni-1982-batch.svg",
+            image: item.image || "/logo.png",
             submittedAt: item.submittedAt || item.submitted_at || new Date().toISOString(),
             likes: Number(item.likes) || 1,
           });

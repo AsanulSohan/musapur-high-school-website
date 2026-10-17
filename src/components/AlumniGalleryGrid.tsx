@@ -56,6 +56,10 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
       "test-check-connection",
       "alumni-1792104318857-3edll",
       "alumni-1792104703795-aibab",
+      "alumni-2014-04",
+      "alumni-2005-03",
+      "alumni-1996-02",
+      "alumni-1982-01",
     ]);
 
     async function loadStories() {
