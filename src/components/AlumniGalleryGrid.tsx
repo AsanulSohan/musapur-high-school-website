@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { AlumniStoryItem } from "@/types";
@@ -19,6 +19,9 @@ import {
   Sparkles,
   ArrowRight,
   Maximize2,
+  ChevronLeft,
+  ChevronRight,
+  ArrowLeftRight,
 } from "lucide-react";
 import Modal from "./Modal";
 import AlumniUploadForm from "./AlumniUploadForm";
@@ -37,6 +40,15 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [selectedStory, setSelectedStory] = useState<AlumniStoryItem | null>(null);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = direction === "left" ? -380 : 380;
+      scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
 
   // Fetch stories on mount from API and merge with local cache
   useEffect(() => {
@@ -227,119 +239,181 @@ export default function AlumniGalleryGrid({ initialStories = [] }: AlumniGallery
             ))}
           </div>
 
-          {/* Search Box */}
-          <div className="relative w-full md:w-72">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isBn ? "স্মৃতি বা ব্যাচ খুঁজুন..." : "Search memory or batch..."}
-              className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-emerald-600 bg-slate-50 font-bangla"
-            />
+          {/* Search Box & Navigation Controls */}
+          <div className="flex items-center gap-2.5 w-full md:w-auto">
+            <div className="relative w-full md:w-64">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={isBn ? "স্মৃতি বা ব্যাচ খুঁজুন..." : "Search memory or batch..."}
+                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:border-emerald-600 bg-slate-50 font-bangla"
+              />
+            </div>
+
+            {/* Slider Navigation Buttons */}
+            <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => scroll("left")}
+                className="p-2 rounded-xl bg-slate-100 hover:bg-[#064e3b] text-slate-700 hover:text-white transition shadow-2xs border border-slate-200/80 active:scale-95 cursor-pointer"
+                title={isBn ? "বামে স্ক্রোল করুন" : "Scroll left"}
+                aria-label="Scroll left"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={() => scroll("right")}
+                className="p-2 rounded-xl bg-slate-100 hover:bg-[#064e3b] text-slate-700 hover:text-white transition shadow-2xs border border-slate-200/80 active:scale-95 cursor-pointer"
+                title={isBn ? "ডানে স্ক্রোল করুন" : "Scroll right"}
+                aria-label="Scroll right"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Gallery Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filteredStories.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => setSelectedStory(item)}
-              className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-500 transition duration-300 flex flex-col justify-between cursor-pointer group"
-            >
-              <div>
-                {/* Photo with Overlay Badge */}
-                <div className="relative h-56 w-full bg-slate-900 overflow-hidden">
-                  <Image
-                    src={item.image}
-                    alt={isBn ? item.titleBn : item.titleEn}
-                    fill
-                    className="object-cover transition duration-500 group-hover:scale-108"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    unoptimized={true}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-75 group-hover:opacity-85 transition" />
+        {/* Gallery Cards Single-Row Horizontal Carousel */}
+        <div className="relative">
+          {/* Left Floating Arrow (desktop) */}
+          <button
+            type="button"
+            onClick={() => scroll("left")}
+            className="hidden xl:flex absolute -left-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/95 hover:bg-white text-slate-800 hover:text-[#064e3b] items-center justify-center shadow-lg border border-slate-200 transition transform hover:scale-110 active:scale-95 cursor-pointer"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft size={22} />
+          </button>
 
-                  {/* Batch Year Badge */}
-                  <div className="absolute top-3 left-3">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900/85 backdrop-blur-xs text-amber-300 text-[10px] font-bold border border-amber-400/40 shadow-xs font-mono">
-                      <GraduationCap size={11} />
-                      <span>SSC &apos;{normalizeBatchYear(item.batch).slice(-2) || item.batch}</span>
-                    </span>
+          {/* Single Row Horizontal Scroll/Swipe Container */}
+          <div
+            ref={scrollContainerRef}
+            className="flex items-stretch gap-6 overflow-x-auto pb-6 pt-2 px-1 scroll-smooth snap-x snap-mandatory notice-scrollbar"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
+            {filteredStories.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => setSelectedStory(item)}
+                className="w-[285px] sm:w-[320px] lg:w-[340px] shrink-0 snap-start bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-500 transition duration-300 flex flex-col justify-between cursor-pointer group"
+              >
+                <div>
+                  {/* Photo with Overlay Badge */}
+                  <div className="relative h-56 w-full bg-slate-900 overflow-hidden">
+                    <Image
+                      src={item.image}
+                      alt={isBn ? item.titleBn : item.titleEn}
+                      fill
+                      className="object-cover transition duration-500 group-hover:scale-108"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      unoptimized={true}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-75 group-hover:opacity-85 transition" />
+
+                    {/* Batch Year Badge */}
+                    <div className="absolute top-3 left-3">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900/85 backdrop-blur-xs text-amber-300 text-[10px] font-bold border border-amber-400/40 shadow-xs font-mono">
+                        <GraduationCap size={11} />
+                        <span>SSC &apos;{normalizeBatchYear(item.batch).slice(-2) || item.batch}</span>
+                      </span>
+                    </div>
+
+                    {/* Zoom button on hover */}
+                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition p-1.5 rounded-full bg-slate-900/70 text-white">
+                      <Maximize2 size={13} />
+                    </div>
+
+                    {/* Photo Title Overlay */}
+                    <div className="absolute bottom-2.5 left-3 right-3 text-white">
+                      <h4 className="font-bangla-serif text-sm font-bold line-clamp-1 group-hover:text-amber-300 transition">
+                        {isBn ? item.titleBn : item.titleEn}
+                      </h4>
+                    </div>
                   </div>
 
-                  {/* Zoom button on hover */}
-                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition p-1.5 rounded-full bg-slate-900/70 text-white">
-                    <Maximize2 size={13} />
-                  </div>
+                  {/* Content Section */}
+                  <div className="p-4 space-y-3">
+                    {/* Alumnus Identity */}
+                    <div className="space-y-0.5 pb-2 border-b border-slate-100">
+                      <h5 className="font-bangla font-bold text-slate-900 text-sm">
+                        {isBn ? item.nameBn : item.nameEn}
+                      </h5>
+                      {item.professionBn && (
+                        <p className="text-[11px] text-slate-500 font-bangla flex items-center gap-1">
+                          <Briefcase size={11} className="text-emerald-700 shrink-0" />
+                          <span className="truncate">{isBn ? item.professionBn : item.professionEn}</span>
+                        </p>
+                      )}
+                      {item.locationBn && (
+                        <p className="text-[10px] text-slate-400 font-bangla flex items-center gap-1">
+                          <MapPin size={10} className="text-amber-600 shrink-0" />
+                          <span className="truncate">{isBn ? item.locationBn : item.locationEn}</span>
+                        </p>
+                      )}
+                    </div>
 
-                  {/* Photo Title Overlay */}
-                  <div className="absolute bottom-2.5 left-3 right-3 text-white">
-                    <h4 className="font-bangla-serif text-sm font-bold line-clamp-1 group-hover:text-amber-300 transition">
-                      {isBn ? item.titleBn : item.titleEn}
-                    </h4>
+                    {/* Story Quotation Snippet */}
+                    <div className="relative">
+                      <Quote size={14} className="text-amber-400/40 absolute -top-1 -left-1" />
+                      <p className="font-bangla text-xs text-slate-600 line-clamp-3 leading-relaxed pl-3 italic">
+                        "{isBn ? item.storyBn : item.storyEn}"
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Content Section */}
-                <div className="p-4 space-y-3">
-                  {/* Alumnus Identity */}
-                  <div className="space-y-0.5 pb-2 border-b border-slate-100">
-                    <h5 className="font-bangla font-bold text-slate-900 text-sm">
-                      {isBn ? item.nameBn : item.nameEn}
-                    </h5>
-                    {item.professionBn && (
-                      <p className="text-[11px] text-slate-500 font-bangla flex items-center gap-1">
-                        <Briefcase size={11} className="text-emerald-700 shrink-0" />
-                        <span className="truncate">{isBn ? item.professionBn : item.professionEn}</span>
-                      </p>
-                    )}
-                    {item.locationBn && (
-                      <p className="text-[10px] text-slate-400 font-bangla flex items-center gap-1">
-                        <MapPin size={10} className="text-amber-600 shrink-0" />
-                        <span className="truncate">{isBn ? item.locationBn : item.locationEn}</span>
-                      </p>
-                    )}
-                  </div>
+                {/* Card Footer: Likes & Read More */}
+                <div className="px-4 py-3 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs">
+                  {/* Like Button */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleLike(item.id, e)}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold transition ${
+                      likedIds.has(item.id)
+                        ? "bg-rose-50 text-rose-600 border border-rose-200"
+                        : "text-slate-500 hover:text-rose-600 hover:bg-slate-200/50"
+                    }`}
+                    title="Like this memory"
+                  >
+                    <Heart
+                      size={13}
+                      className={likedIds.has(item.id) ? "fill-rose-500 text-rose-500" : ""}
+                    />
+                    <span>{item.likes || 0}</span>
+                  </button>
 
-                  {/* Story Quotation Snippet */}
-                  <div className="relative">
-                    <Quote size={14} className="text-amber-400/40 absolute -top-1 -left-1" />
-                    <p className="font-bangla text-xs text-slate-600 line-clamp-3 leading-relaxed pl-3 italic">
-                      "{isBn ? item.storyBn : item.storyEn}"
-                    </p>
-                  </div>
+                  <span className="font-bangla text-xs font-bold text-[#064e3b] group-hover:text-[#0d5c4a] flex items-center gap-1">
+                    <span>{isBn ? "স্মৃতি পড়ুন" : "Read Story"}</span>
+                    <ArrowRight size={12} className="group-hover:translate-x-0.5 transition" />
+                  </span>
                 </div>
               </div>
+            ))}
+          </div>
 
-              {/* Card Footer: Likes & Read More */}
-              <div className="px-4 py-3 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs">
-                {/* Like Button */}
-                <button
-                  type="button"
-                  onClick={(e) => handleLike(item.id, e)}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold transition ${
-                    likedIds.has(item.id)
-                      ? "bg-rose-50 text-rose-600 border border-rose-200"
-                      : "text-slate-500 hover:text-rose-600 hover:bg-slate-200/50"
-                  }`}
-                  title="Like this memory"
-                >
-                  <Heart
-                    size={13}
-                    className={likedIds.has(item.id) ? "fill-rose-500 text-rose-500" : ""}
-                  />
-                  <span>{item.likes || 0}</span>
-                </button>
+          {/* Right Floating Arrow (desktop) */}
+          <button
+            type="button"
+            onClick={() => scroll("right")}
+            className="hidden xl:flex absolute -right-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/95 hover:bg-white text-slate-800 hover:text-[#064e3b] items-center justify-center shadow-lg border border-slate-200 transition transform hover:scale-110 active:scale-95 cursor-pointer"
+            aria-label="Scroll right"
+          >
+            <ChevronRight size={22} />
+          </button>
+        </div>
 
-                <span className="font-bangla text-xs font-bold text-[#064e3b] group-hover:text-[#0d5c4a] flex items-center gap-1">
-                  <span>{isBn ? "স্মৃতি পড়ুন" : "Read Story"}</span>
-                  <ArrowRight size={12} className="group-hover:translate-x-0.5 transition" />
-                </span>
-              </div>
-            </div>
-          ))}
+        {/* Swipe Hint Indicator */}
+        <div className="flex items-center justify-between mt-2 px-1 text-xs text-slate-500 font-bangla">
+          <span className="flex items-center gap-1.5 text-[11px] text-slate-500">
+            <ArrowLeftRight size={13} className="text-emerald-700" />
+            <span>{isBn ? "ডানে-বামে সুইপ করে বা স্ক্রোল করে সকল স্মৃতি দেখুন" : "Swipe left or right to view all memories"}</span>
+          </span>
+          <span className="text-[11px] font-mono text-slate-400">
+            {filteredStories.length} {isBn ? "টি স্মৃতি প্রদর্শিত" : "stories shared"}
+          </span>
         </div>
 
         {/* Empty State */}
